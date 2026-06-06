@@ -1,8 +1,34 @@
+# Virtual environment
 venv/
-__pycache__/
-*.pyc
 .env
-data/raw/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Data
+data/
+
+# Database
 *.db
+*.sqlite3
+
+# Node
 node_modules/
+
+# OS
 .DS_Store
+
+# IDE
+.vscode/
+.idea/
+
+# Logs
+*.log
