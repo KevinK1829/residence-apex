@@ -24,7 +24,10 @@ app = FastAPI(lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=[
+        "http://localhost:3000",
+        "https://residence-apex.vercel.app"
+    ],
     allow_methods=["*"],
     allow_headers=["*"],
 )
