@@ -37,9 +37,26 @@ def get_ranking(zip_code: str):
         raise HTTPException(status_code=404, detail=f"Zip code {zip_code} not found")
 
 @app.get("/value/{zip_code}")
-def get_value(zip_code: str, salary: float):
+async def get_value(zip_code: str, salary: float):
+    median_income = None
+    if CENSUS_KEY:
+        url = "https://api.census.gov/data/2023/acs/acs5"
+        params = {
+            "get": "B19013_001E",
+            "for": f"zip code tabulation area:{zip_code}",
+            "key": CENSUS_KEY,
+        }
+        try:
+            async with httpx.AsyncClient() as client:
+                res = await client.get(url, params=params)
+                if res.status_code == 200 and len(res.json()) > 1:
+                    val = int(res.json()[1][0])
+                    median_income = val if val >= 0 else None
+        except Exception:
+            median_income = None
+
     try:
-        return compute_value_tier(zip_code, salary, ranked_df)
+        return compute_value_tier(zip_code, salary, ranked_df, median_income)
     except KeyError:
         raise HTTPException(status_code=404, detail=f"Zip code {zip_code} not found")
 
@@ -89,3 +106,39 @@ async def get_population(zip_code: str):
         
         pop_2023 = int(data[1][0])
         return {"zip": zip_code, "population_2023": pop_2023}
+
+@app.get("/demographics/{zip_code}")
+async def get_demographics(zip_code: str):
+    if not CENSUS_KEY:
+        raise HTTPException(status_code=500, detail="Census API key not configured")
+
+    url = "https://api.census.gov/data/2023/acs/acs5"
+    params = {
+        "get": "B19013_001E,B25077_001E,B25064_001E,NAME",
+        "for": f"zip code tabulation area:{zip_code}",
+        "key": CENSUS_KEY,
+    }
+
+    async with httpx.AsyncClient() as client:
+        res = await client.get(url, params=params)
+        if res.status_code != 200:
+            raise HTTPException(status_code=404, detail="Demographic data not found")
+        data = res.json()
+        if len(data) < 2:
+            raise HTTPException(status_code=404, detail="No data for this zip")
+
+        row = data[1]
+
+        def safe_int(v):
+            try:
+                val = int(v)
+                return val if val >= 0 else None  # Census uses negatives as null flags
+            except (ValueError, TypeError):
+                return None
+
+        return {
+            "zip": zip_code,
+            "median_income": safe_int(row[0]),
+            "median_home_value_census": safe_int(row[1]),
+            "median_rent": safe_int(row[2]),
+        }

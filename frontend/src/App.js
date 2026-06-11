@@ -191,7 +191,7 @@ export default function App() {
                 <div style={{ fontSize: 28, fontWeight: 700, color: config.text }}>{config.label}</div>
                 <div style={{ fontSize: 13, color: config.text, opacity: 0.7 }}>
                   {isPersonalized
-                    ? `Personalized value on your salary · ${result.price_to_income}x income`
+                    ? `Personalized value · ${result.price_to_income}x your income${result.local_price_to_income ? ` · ${result.local_price_to_income}x local income` : ""}`
                     : "Market position within metro · enter salary for value score"}
                 </div>
               </div>
