@@ -35,3 +35,18 @@ def get_ranking(zip_code: str):
 @app.get("/health")
 def health():
     return {"status": "ok"}
+
+@app.get("/history/{zip_code}")
+def get_history(zip_code: str):
+    row = ranked_df[ranked_df["RegionName"] == str(zip_code)]
+    if row.empty:
+        raise HTTPException(status_code=404, detail=f"Zip code {zip_code} not found")
+    row = row.iloc[0]
+    meta_cols = ["RegionID", "RegionName", "State", "City", "Metro", 
+                 "CountyName", "avg_value", "percentile_rank", "tier"]
+    date_data = {
+        col: round(row[col], 2) 
+        for col in ranked_df.columns 
+        if col not in meta_cols and not row[col] != row[col]
+    }
+    return {"zip": zip_code, "history": date_data}
