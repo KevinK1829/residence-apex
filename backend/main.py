@@ -8,7 +8,7 @@ load_dotenv()
 
 sys.path.append(os.path.dirname(__file__))
 from clean import clean
-from ranking import rank_zips, get_zip_tier
+from ranking import rank_zips, get_zip_tier, compute_value_tier
 
 ranked_df = None
 
@@ -33,6 +33,13 @@ app.add_middleware(
 def get_ranking(zip_code: str):
     try:
         return get_zip_tier(zip_code, ranked_df)
+    except KeyError:
+        raise HTTPException(status_code=404, detail=f"Zip code {zip_code} not found")
+
+@app.get("/value/{zip_code}")
+def get_value(zip_code: str, salary: float):
+    try:
+        return compute_value_tier(zip_code, salary, ranked_df)
     except KeyError:
         raise HTTPException(status_code=404, detail=f"Zip code {zip_code} not found")
 
