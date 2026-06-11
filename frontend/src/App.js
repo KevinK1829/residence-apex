@@ -69,6 +69,7 @@ export default function App() {
   const [salary, setSalary] = useState("");
   const [result, setResult] = useState(null);
   const [history, setHistory] = useState(null);
+  const [population, setPopulation] = useState(null);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
 
@@ -77,11 +78,13 @@ export default function App() {
     setError(null);
     setResult(null);
     setHistory(null);
+    setPopulation(null);
     setLoading(true);
     try {
-      const [rankRes, histRes] = await Promise.all([
+      const [rankRes, histRes, popRes] = await Promise.all([
         fetch(`http://localhost:8000/ranking/${zip}`),
-        fetch(`http://localhost:8000/history/${zip}`)
+        fetch(`http://localhost:8000/history/${zip}`),
+        fetch(`http://localhost:8000/population/${zip}`)
       ]);
       if (!rankRes.ok) throw new Error("Zip code not found — try a zip in a major metro (NY, LA, Chicago, Dallas, Boston, DC, Pittsburgh, Philadelphia, Minneapolis, St. Louis)");
       const rankData = await rankRes.json();
@@ -92,6 +95,10 @@ export default function App() {
         value: Math.round(value)
       }));
       setHistory(chartData);
+      if (popRes.ok) {
+        const popData = await popRes.json();
+        setPopulation(popData.population_2023);
+      }
     } catch (e) {
       setError(e.message);
     } finally {
@@ -177,12 +184,13 @@ export default function App() {
               </div>
             </div>
 
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 16 }}>
               {[
                 { label: "Zip Code", value: result.zip },
                 { label: "Metro Area", value: result.metro.split(",")[0] },
                 { label: "Avg Home Value", value: `$${result.avg_value.toLocaleString()}` },
                 { label: "Metro Percentile", value: `${Math.round(result.percentile_rank * 100)}th` },
+                { label: "Population (2023)", value: population ? population.toLocaleString() : "—" },
               ].map(({ label, value }) => (
                 <div key={label} style={{ background: "rgba(255,255,255,0.5)", borderRadius: 10, padding: "12px 16px" }}>
                   <div style={{ fontSize: 11, color: config.text, opacity: 0.6, marginBottom: 3, textTransform: "uppercase", letterSpacing: "0.05em" }}>{label}</div>
