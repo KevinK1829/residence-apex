@@ -43,6 +43,20 @@ const PRESETS = {
   local_value: { label: "Local value", afford: 0.25, desire: 0.20, local: 0.55, icon: "🏘️" },
 };
 
+const CITY_FACTS = {
+  "New York":      { state: "New York",             stateCode: "ny", founded: "1624", blurb: "The most populous city in the U.S. and a global center of finance, culture, and media across five boroughs.", facts: ["The Statue of Liberty's copper skin is only about as thick as two pennies", "Largest subway system in the U.S. by number of stations", "Originally a Dutch settlement called New Amsterdam"] },
+  "Los Angeles":   { state: "California",           stateCode: "ca", founded: "1781", blurb: "The heart of the entertainment industry and the second-largest U.S. city, sprawling from the Pacific coast to the mountains.", facts: ["The Hollywood Sign originally read 'HOLLYWOODLAND' as a real-estate ad", "Home to Griffith Observatory and the Walk of Fame", "Spans a huge range of microclimates and neighborhoods"] },
+  "Chicago":       { state: "Illinois",             stateCode: "il", founded: "1837", blurb: "The largest city in the Midwest, built on Lake Michigan as a railroad and trading hub, known for its architecture and resilience.", facts: ["The Chicago River is dyed emerald green every St. Patrick's Day", "Home to the first modern skyscraper (1885)", "The 'L' was the first elevated railway in the U.S. (1892)"] },
+  "Philadelphia":  { state: "Pennsylvania",         stateCode: "pa", founded: "1682", blurb: "America's first capital and a cradle of the nation's founding, rich with colonial history.", facts: ["Home to the country's first-ever zoo and hospital", "Site of Independence Hall and the Liberty Bell", "Was the U.S. capital before Washington, D.C."] },
+  "Dallas":        { state: "Texas",                stateCode: "tx", founded: "1841", blurb: "A major commercial and cultural hub in North Texas, anchor of one of the fastest-growing metros in the country.", facts: ["The microchip was invented here in 1958 by Jack Kilby at Texas Instruments", "Home to Reunion Tower and the Dallas Arboretum", "Part of the larger Dallas-Fort Worth metroplex"] },
+  "Fort Worth":    { state: "Texas",                stateCode: "tx", founded: "1849", blurb: "Once an army outpost, Fort Worth keeps its cowboy heritage alive while anchoring the western half of the DFW metroplex.", facts: ["Features a twice-daily live cattle drive in the Stockyards", "Home to the acclaimed Kimbell Art Museum", "Started as a frontier army post"] },
+  "Washington":    { state: "District of Columbia", stateCode: "dc", founded: "1790", blurb: "The capital of the United States, a planned city of monuments, museums, and federal institutions.", facts: ["Building heights are capped so the Capitol and Washington Monument stay dominant", "Home to the Smithsonian museums and the National Mall", "Was purpose-built as the seat of government"] },
+  "Boston":        { state: "Massachusetts",        stateCode: "ma", founded: "1630", blurb: "One of the oldest U.S. cities and a hub of education and revolutionary history in New England.", facts: ["Home to the first public park, public school, and subway in the U.S.", "The Freedom Trail links 16 historic sites", "A center of the American Revolution"] },
+  "Pittsburgh":    { state: "Pennsylvania",     stateCode: "pa", founded: "1758", blurb: "The 'Steel City,' built where three rivers meet, transformed from an industrial powerhouse into a hub for tech, robotics, and healthcare.", facts: ["Sits at the confluence of the Allegheny, Monongahela, and Ohio rivers", "Dr. Jonas Salk developed the first polio vaccine at the University of Pittsburgh (1954)", "The :-) emoticon was invented at Carnegie Mellon in 1982"] },
+  "Minneapolis":   { state: "Minnesota",        stateCode: "mn", founded: "1867", blurb: "The larger of the Twin Cities, built on the only major waterfall on the Mississippi, once the flour-milling capital of the world.", facts: ["Has the world's largest continuous skyway system — 8 miles linking 73 blocks", "The name blends the Dakota word 'minne' (water) with the Greek 'polis' (city)", "Known as 'Mill City' for its flour-milling history"] },
+  "St. Louis":     { state: "Missouri",         stateCode: "mo", founded: "1764", blurb: "Founded as a French fur-trading post on the Mississippi, the 'Gateway to the West' and launch point of the Lewis and Clark expedition.", facts: ["Home to the Gateway Arch — at 630 feet, the tallest monument in the U.S.", "Founded by French fur traders Pierre Laclède and Auguste Chouteau", "Starting point of the 1804 Lewis and Clark expedition"] },
+};
+
 function PreferenceControls({ weights, setWeights, activePreset, setActivePreset }) {
   function applyPreset(key) {
     setActivePreset(key);
@@ -107,6 +121,77 @@ function PreferenceControls({ weights, setWeights, activePreset, setActivePreset
   );
 }
 
+function StatTile({ label, value, suffix }) {
+  return (
+    <div style={{ background: "#f7f7fa", borderRadius: 12, padding: "12px 14px" }}>
+      <div style={{ fontSize: 11, color: "#888", marginBottom: 3 }}>{label}</div>
+      <div style={{ fontSize: 18, fontWeight: 700, color: "#1a1a2e" }}>
+        {value == null ? "—" : `${value}${suffix || ""}`}
+      </div>
+    </div>
+  );
+}
+
+function lookupCity(city) {
+  if (!city) return null;
+  if (CITY_FACTS[city]) return CITY_FACTS[city];
+  const norm = city.replace(/\./g, "").replace(/^Saint /i, "St ").trim();
+  const match = Object.keys(CITY_FACTS).find(
+    k => k.replace(/\./g, "").replace(/^Saint /i, "St ").toLowerCase() === norm.toLowerCase()
+  );
+  return match ? CITY_FACTS[match] : null;
+}
+
+function CityHero({ city, state, metro }) {
+  const facts = lookupCity(city);
+  const stateCode = facts?.stateCode;
+
+  return (
+    <div style={{
+      position: "relative", overflow: "hidden",
+      background: "white", borderRadius: 16, padding: 22,
+      boxShadow: "0 1px 4px rgba(0,0,0,0.08)", minHeight: 160,
+    }}>
+      {stateCode && (
+        <img
+          src={`https://flagcdn.com/w320/us-${stateCode}.png`}
+          alt=""
+          style={{
+            position: "absolute", top: 0, right: 0,
+            width: 180, opacity: 0.10, pointerEvents: "none",
+            transform: "translate(20%, -10%)",
+          }}
+        />
+      )}
+
+      <div style={{ position: "relative", zIndex: 1 }}>
+        <div style={{ fontSize: 22, fontWeight: 700, color: "#1a1a2e" }}>
+          {city || "—"}
+        </div>
+        <div style={{ fontSize: 13, color: "#888", marginBottom: 10 }}>
+          {[facts?.state || state, facts?.founded && `Founded ${facts.founded}`]
+            .filter(Boolean).join(" · ")}
+        </div>
+
+        {facts ? (
+          <>
+            <div style={{ fontSize: 13.5, color: "#444", lineHeight: 1.5, marginBottom: 12 }}>
+              {facts.blurb}
+            </div>
+            <ul style={{ margin: 0, paddingLeft: 18, fontSize: 12.5, color: "#666", lineHeight: 1.7 }}>
+              {facts.facts.map((f, i) => <li key={i}>{f}</li>)}
+            </ul>
+          </>
+        ) : (
+          <div style={{ fontSize: 13, color: "#999", lineHeight: 1.5 }}>
+            Part of the {metro} metro area.
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 function AffordabilityBar({ salary, avgValue }) {
   if (!salary || !avgValue) return null;
   const annual = parseFloat(salary);
@@ -141,6 +226,7 @@ export default function App() {
   const [result, setResult] = useState(null);
   const [history, setHistory] = useState(null);
   const [population, setPopulation] = useState(null);
+  const [stats, setStats] = useState(null);
   const [weights, setWeights] = useState({ afford: 0.40, desire: 0.30, local: 0.30 });
   const [activePreset, setActivePreset] = useState("balanced");
   const [error, setError] = useState(null);
@@ -178,6 +264,14 @@ export default function App() {
 
     return () => clearTimeout(handler);
   }, [salary, weights, result?.zip]);
+
+  useEffect(() => {
+    if (!result?.zip) { setStats(null); return; }
+    fetch(`https://residence-apex.onrender.com/stats/${result.zip}`)
+      .then(r => (r.ok ? r.json() : null))
+      .then(setStats)
+      .catch(() => setStats(null));
+  }, [result?.zip]);
 
   async function handleSearch() {
     if (!zip || zip.length < 5) return;
@@ -225,7 +319,19 @@ export default function App() {
 
   return (
     <div style={{ minHeight: "100vh", background: "#f7f8fa", fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" }}>
-      <div style={{ maxWidth: 680, margin: "0 auto", padding: "60px 1.5rem 80px" }}>
+      <style>{`
+        .dashboard-grid {
+          display: grid;
+          grid-template-columns: 1fr;
+          gap: 20px;
+        }
+        @media (min-width: 900px) {
+          .dashboard-grid {
+            grid-template-columns: 1fr 1fr;
+          }
+        }
+      `}</style>
+      <div style={{ maxWidth: 1200, margin: "0 auto", padding: "60px 1.5rem 80px" }}>
 
         <div style={{ marginBottom: 40 }}>
           <h1 style={{ fontSize: 32, fontWeight: 700, margin: "0 0 6px", color: "#1a1a2e" }}>
@@ -290,69 +396,100 @@ export default function App() {
         )}
 
         {result && (
-          <PreferenceControls
-            weights={weights}
-            setWeights={setWeights}
-            activePreset={activePreset}
-            setActivePreset={setActivePreset}
-          />
-        )}
+          <div className="dashboard-grid">
+            {/* Top-left: city hero */}
+            <CityHero
+              city={result.city}
+              state={result.state}
+              metro={result.metro}
+            />
 
-        {result && config && (
-          <div style={{ background: config.gradient, border: `2px solid ${config.border}`, borderRadius: 16, padding: 28, marginBottom: 20, boxShadow: "0 2px 12px rgba(0,0,0,0.06)" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 20 }}>
-              <span style={{ fontSize: 40 }}>{config.emoji}</span>
-              <div>
-                <div style={{ fontSize: 28, fontWeight: 700, color: config.text }}>{config.label}</div>
-                <div style={{ fontSize: 13, color: config.text, opacity: 0.7 }}>
-                  {isPersonalized
-                    ? `Personalized value · ${result.price_to_income}x your income${result.local_price_to_income ? ` · ${result.local_price_to_income}x local income` : ""}`
-                    : "Market position within metro · enter salary for value score"}
+            {/* Top-right: preference controls */}
+            <PreferenceControls
+              weights={weights}
+              setWeights={setWeights}
+              activePreset={activePreset}
+              setActivePreset={setActivePreset}
+            />
+
+            {/* Bottom-left: ranking badge */}
+            <div>
+              {config && (
+                <div style={{ background: config.gradient, border: `2px solid ${config.border}`, borderRadius: 16, padding: 28, boxShadow: "0 2px 12px rgba(0,0,0,0.06)" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 20 }}>
+                    <span style={{ fontSize: 40 }}>{config.emoji}</span>
+                    <div>
+                      <div style={{ fontSize: 28, fontWeight: 700, color: config.text }}>{config.label}</div>
+                      <div style={{ fontSize: 13, color: config.text, opacity: 0.7 }}>
+                        {isPersonalized
+                          ? `Personalized value · ${result.price_to_income}x your income${result.local_price_to_income ? ` · ${result.local_price_to_income}x local income` : ""}`
+                          : "Market position within metro · enter salary for value score"}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 16 }}>
+                    {[
+                      { label: "Zip Code", value: result.zip },
+                      { label: "Metro Area", value: result.metro.split(",")[0] },
+                      { label: "Avg Home Value", value: `$${result.avg_value.toLocaleString()}` },
+                      { label: "Metro Percentile", value: `${Math.round(result.percentile_rank * 100)}th` },
+                      { label: "Population (2023)", value: population ? population.toLocaleString() : "—" },
+                    ].map(({ label, value }) => (
+                      <div key={label} style={{ background: "rgba(255,255,255,0.5)", borderRadius: 10, padding: "12px 16px" }}>
+                        <div style={{ fontSize: 11, color: config.text, opacity: 0.6, marginBottom: 3, textTransform: "uppercase", letterSpacing: "0.05em" }}>{label}</div>
+                        <div style={{ fontSize: 18, fontWeight: 600, color: config.text }}>{value}</div>
+                      </div>
+                    ))}
+                  </div>
+
+                  <AffordabilityBar salary={salary} avgValue={result.avg_value} />
+
+                  {stats && (
+                    <div style={{
+                      display: "grid",
+                      gridTemplateColumns: "repeat(auto-fit, minmax(110px, 1fr))",
+                      gap: 10, marginTop: 14,
+                    }}>
+                      <StatTile label="Median age"    value={stats.median_age} />
+                      <StatTile label="Mean commute"  value={stats.mean_commute} suffix=" min" />
+                      <StatTile label="Homeowners"    value={stats.owner_pct} suffix="%" />
+                      <StatTile label="Renters"       value={stats.renter_pct} suffix="%" />
+                      <StatTile label="Below poverty" value={stats.poverty_pct} suffix="%" />
+                      <StatTile label="Bachelor's+"   value={stats.bachelors_plus_pct} suffix="%" />
+                    </div>
+                  )}
                 </div>
-              </div>
+              )}
             </div>
 
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 16 }}>
-              {[
-                { label: "Zip Code", value: result.zip },
-                { label: "Metro Area", value: result.metro.split(",")[0] },
-                { label: "Avg Home Value", value: `$${result.avg_value.toLocaleString()}` },
-                { label: "Metro Percentile", value: `${Math.round(result.percentile_rank * 100)}th` },
-                { label: "Population (2023)", value: population ? population.toLocaleString() : "—" },
-              ].map(({ label, value }) => (
-                <div key={label} style={{ background: "rgba(255,255,255,0.5)", borderRadius: 10, padding: "12px 16px" }}>
-                  <div style={{ fontSize: 11, color: config.text, opacity: 0.6, marginBottom: 3, textTransform: "uppercase", letterSpacing: "0.05em" }}>{label}</div>
-                  <div style={{ fontSize: 18, fontWeight: 600, color: config.text }}>{value}</div>
+            {/* Bottom-right: price history chart */}
+            <div>
+              {history && (
+                <div style={{ background: "white", borderRadius: 16, padding: 24, boxShadow: "0 1px 4px rgba(0,0,0,0.08)" }}>
+                  <div style={{ fontSize: 15, fontWeight: 600, marginBottom: 20, color: "#1a1a2e" }}>
+                    Home Value History · {result?.zip}
+                  </div>
+                  <ResponsiveContainer width="100%" height={220}>
+                    <LineChart data={history}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                      <XAxis dataKey="date" tick={{ fontSize: 11 }} interval={11} />
+                      <YAxis
+                        tick={{ fontSize: 11 }}
+                        tickFormatter={v => `$${(v / 1000).toFixed(0)}k`}
+                        width={55}
+                        domain={['auto', 'auto']}
+                      />
+                      <Tooltip
+                        formatter={v => [`$${v.toLocaleString()}`, "Home Value"]}
+                        contentStyle={{ borderRadius: 8, border: "1px solid #eee", fontSize: 13 }}
+                      />
+                      <Line type="monotone" dataKey="value" stroke={config?.accent || "#2980b9"} strokeWidth={2.5} dot={false} />
+                    </LineChart>
+                  </ResponsiveContainer>
                 </div>
-              ))}
+              )}
             </div>
-
-            <AffordabilityBar salary={salary} avgValue={result.avg_value} />
-          </div>
-        )}
-
-        {history && (
-          <div style={{ background: "white", borderRadius: 16, padding: 24, boxShadow: "0 1px 4px rgba(0,0,0,0.08)" }}>
-            <div style={{ fontSize: 15, fontWeight: 600, marginBottom: 20, color: "#1a1a2e" }}>
-              Home Value History · {result?.zip}
-            </div>
-            <ResponsiveContainer width="100%" height={220}>
-              <LineChart data={history}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                <XAxis dataKey="date" tick={{ fontSize: 11 }} interval={11} />
-                <YAxis
-                  tick={{ fontSize: 11 }}
-                  tickFormatter={v => `$${(v / 1000).toFixed(0)}k`}
-                  width={55}
-                  domain={['auto', 'auto']}
-                />
-                <Tooltip
-                  formatter={v => [`$${v.toLocaleString()}`, "Home Value"]}
-                  contentStyle={{ borderRadius: 8, border: "1px solid #eee", fontSize: 13 }}
-                />
-                <Line type="monotone" dataKey="value" stroke={config?.accent || "#2980b9"} strokeWidth={2.5} dot={false} />
-              </LineChart>
-            </ResponsiveContainer>
           </div>
         )}
 

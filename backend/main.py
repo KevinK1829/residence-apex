@@ -151,3 +151,73 @@ async def get_demographics(zip_code: str):
             "median_home_value_census": safe_int(row[1]),
             "median_rent": safe_int(row[2]),
         }
+
+@app.get("/stats/{zip_code}")
+async def get_stats(zip_code: str):
+    if not CENSUS_KEY:
+        raise HTTPException(status_code=503, detail="Census API key not configured")
+
+    variables = [
+        "B01002_001E",                                  # median age
+        "B25003_001E", "B25003_002E", "B25003_003E",    # tenure: total, owner, renter
+        "B17001_001E", "B17001_002E",                   # poverty: total, below poverty
+        "B08013_001E", "B08303_001E",                   # commute: aggregate minutes, workers
+        "B15003_001E", "B15003_022E", "B15003_023E",    # education: total 25+, bachelor's, master's
+        "B15003_024E", "B15003_025E",                   #   professional, doctorate
+    ]
+    url = "https://api.census.gov/data/2023/acs/acs5"
+    params = {
+        "get": ",".join(variables),
+        "for": f"zip code tabulation area:{zip_code}",
+        "key": CENSUS_KEY,
+    }
+
+    try:
+        async with httpx.AsyncClient() as client:
+            res = await client.get(url, params=params)
+        payload = res.json()
+        if res.status_code != 200 or len(payload) < 2:
+            raise HTTPException(status_code=404, detail=f"No census data for {zip_code}")
+        data = dict(zip(payload[0], payload[1]))
+    except HTTPException:
+        raise
+    except Exception:
+        raise HTTPException(status_code=502, detail="Census request failed")
+
+    def num(key):
+        try:
+            v = float(data.get(key))
+            return v if v >= 0 else None
+        except (TypeError, ValueError):
+            return None
+
+    def pct(part, whole):
+        return round(100 * part / whole, 1) if part is not None and whole else None
+
+    median_age = num("B01002_001E")
+
+    tenure_total = num("B25003_001E")
+    owner_pct  = pct(num("B25003_002E"), tenure_total)
+    renter_pct = pct(num("B25003_003E"), tenure_total)
+
+    poverty_pct = pct(num("B17001_002E"), num("B17001_001E"))
+
+    agg_minutes, workers = num("B08013_001E"), num("B08303_001E")
+    mean_commute = round(agg_minutes / workers, 1) if agg_minutes is not None and workers else None
+
+    edu_total = num("B15003_001E")
+    bachelors_plus = sum(
+        v for v in [num("B15003_022E"), num("B15003_023E"),
+                    num("B15003_024E"), num("B15003_025E")] if v is not None
+    )
+    edu_pct = pct(bachelors_plus, edu_total)
+
+    return {
+        "zip": zip_code,
+        "median_age": median_age,
+        "owner_pct": owner_pct,
+        "renter_pct": renter_pct,
+        "poverty_pct": poverty_pct,
+        "mean_commute": mean_commute,
+        "bachelors_plus_pct": edu_pct,
+    }
