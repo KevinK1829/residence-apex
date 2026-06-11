@@ -90,6 +90,13 @@ export default function App() {
       const rankData = await rankRes.json();
       const histData = await histRes.json();
       setResult(rankData);
+      if (salary) {
+        const valueRes = await fetch(`https://residence-apex.onrender.com/value/${zip}?salary=${salary}`);
+        if (valueRes.ok) {
+          const valueData = await valueRes.json();
+          setResult({ ...rankData, ...valueData });
+        }
+      }
       const chartData = Object.entries(histData.history).map(([date, value]) => ({
         date: date.slice(0, 7),
         value: Math.round(value)
@@ -106,7 +113,9 @@ export default function App() {
     }
   }
 
-  const config = result ? TIER_CONFIG[result.tier] : null;
+  const displayTier = result ? (result.value_tier || result.tier) : null;
+  const config = displayTier ? TIER_CONFIG[displayTier] : null;
+  const isPersonalized = result && result.value_tier;
 
   return (
     <div style={{ minHeight: "100vh", background: "#f7f8fa", fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" }}>
@@ -180,7 +189,11 @@ export default function App() {
               <span style={{ fontSize: 40 }}>{config.emoji}</span>
               <div>
                 <div style={{ fontSize: 28, fontWeight: 700, color: config.text }}>{config.label}</div>
-                <div style={{ fontSize: 13, color: config.text, opacity: 0.7 }}>Housing value tier within metro</div>
+                <div style={{ fontSize: 13, color: config.text, opacity: 0.7 }}>
+                  {isPersonalized
+                    ? `Personalized value on your salary · ${result.price_to_income}x income`
+                    : "Market position within metro · enter salary for value score"}
+                </div>
               </div>
             </div>
 
