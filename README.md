@@ -1,75 +1,36 @@
 # Residence Apex
 
-A housing tier ranking tool that assigns **bronze / silver / gold / platinum** ratings to zip codes based on average home values relative to other zips in the same metro area.
+A full-stack housing value ranking system that assigns **bronze, silver, gold, 
+or platinum** tiers to zip codes across 10 major US metros based on historical 
+Zillow home value data.
 
-## How it works
+**Live demo:** https://residence-apex.vercel.app
 
-Home values come from Zillow's ZHVI dataset (zip-level, 2021–2026). Each zip is ranked within its metro using a percentile-based system:
+## Features
+- Within-metro percentile ranking across 3,495 zip codes
+- Salary affordability analysis
+- Census Bureau population data
+- 5-year home value history chart (2021–2026)
 
-| Tier | Percentile within metro |
-|------|------------------------|
-| Platinum | Top 10% (≥ 90th) |
-| Gold | Top 10–30% (70th–90th) |
-| Silver | Top 30–60% (40th–70th) |
-| Bronze | Bottom 60% (< 40th) |
+## Tech stack
+- **Backend:** Python, FastAPI, Pandas — deployed on Render
+- **Frontend:** React, Recharts — deployed on Vercel
+- **Data:** Zillow ZHVI, US Census ACS5 API
 
-Coverage is scoped to the top 10 US metros by zip count.
+## Methodology
+Tiers are assigned by percentile rank within each metro area so a zip in 
+Chicago is ranked against other Chicago zips, not against Manhattan. 
+Thresholds: platinum (top 10%), gold (70–90th), silver (40–70th), bronze (bottom 40%).
 
-## Stack
-
-- **Backend:** Python, FastAPI, Pandas
-- **Frontend:** React
-- **Data:** Zillow ZHVI (zip-level SFR/condo, middle tier)
-- **Deploy:** Render (backend), Vercel (frontend)
-
-## Project structure
-
-```
-backend/
-  clean.py      # data loading and cleaning pipeline
-  ranking.py    # percentile-based tier assignment logic
-  main.py       # FastAPI app with /ranking/{zip} endpoint
-frontend/
-  src/App.js    # zip search UI with tier result card
-data/
-  Processed/metro_clean.csv   # cleaned zip-level ZHVI (gitignored)
-notebooks/
-  ZipDataCleaning.ipynb       # EDA and data exploration
-```
-
-## API
-
-```
-GET /ranking/{zip_code}
-```
-
-Returns tier metadata for a zip code:
-
-```json
-{
-  "zip": "60614",
-  "metro": "Chicago-Naperville-Elgin, IL-IN-WI",
-  "avg_value": 572835.65,
-  "percentile_rank": 0.9474,
-  "tier": "platinum"
-}
-```
-
-## Running locally
-
-**Backend**
+## Local setup
 ```bash
-python -m venv venv && source venv/bin/activate
-pip install -r requirements.txt
+# Backend
 cd backend
+pip install -r requirements.txt
 uvicorn main:app --reload
-```
 
-**Frontend**
-```bash
+# Frontend
 cd frontend
 npm install
 npm start
 ```
-
-Frontend runs on `http://localhost:3000`, backend on `http://localhost:8000`.
