@@ -1,4 +1,5 @@
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 import pandas as pd
 import sys, os
@@ -12,11 +13,17 @@ ranked_df = None
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     global ranked_df
-    data_path = os.path.join(os.path.dirname(__file__), "..", "data", "Processed", "metro_clean.csv")
-    ranked_df = rank_zips(clean(data_path))
+    ranked_df = rank_zips(clean("../data/Processed/metro_clean.csv"))
     yield
 
 app = FastAPI(lifespan=lifespan)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 @app.get("/ranking/{zip_code}")
 def get_ranking(zip_code: str):
