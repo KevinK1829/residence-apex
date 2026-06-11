@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
 
 const TIER_CONFIG = {
@@ -72,6 +72,35 @@ export default function App() {
   const [population, setPopulation] = useState(null);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    // Only run if we already have a result showing for the current zip.
+    if (!result || !result.zip) return;
+
+    // No salary selected → clear any personalized tier, revert to market tier.
+    if (!salary) {
+      setResult(prev => {
+        if (!prev) return prev;
+        const { value_tier, value_score, price_to_income, local_price_to_income, ...market } = prev;
+        return market;
+      });
+      return;
+    }
+
+    const handler = setTimeout(async () => {
+      try {
+        const res = await fetch(`https://residence-apex.onrender.com/value/${result.zip}?salary=${salary}`);
+        if (res.ok) {
+          const valueData = await res.json();
+          setResult(prev => prev ? { ...prev, ...valueData } : prev);
+        }
+      } catch {
+        // Network hiccup — leave the existing card as-is.
+      }
+    }, 500);
+
+    return () => clearTimeout(handler);
+  }, [salary, result?.zip]);
 
   async function handleSearch() {
     if (!zip || zip.length < 5) return;
