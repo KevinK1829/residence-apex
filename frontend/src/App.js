@@ -73,6 +73,7 @@ export default function App() {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     // Only run if we already have a result showing for the current zip.
     if (!result || !result.zip) return;
