@@ -52,9 +52,23 @@ const CITY_FACTS = {
   "Fort Worth":    { state: "Texas",                stateCode: "tx", founded: "1849", blurb: "Once an army outpost, Fort Worth keeps its cowboy heritage alive while anchoring the western half of the DFW metroplex.", facts: ["Features a twice-daily live cattle drive in the Stockyards", "Home to the acclaimed Kimbell Art Museum", "Started as a frontier army post"] },
   "Washington":    { state: "District of Columbia", stateCode: "dc", founded: "1790", blurb: "The capital of the United States, a planned city of monuments, museums, and federal institutions.", facts: ["Building heights are capped so the Capitol and Washington Monument stay dominant", "Home to the Smithsonian museums and the National Mall", "Was purpose-built as the seat of government"] },
   "Boston":        { state: "Massachusetts",        stateCode: "ma", founded: "1630", blurb: "One of the oldest U.S. cities and a hub of education and revolutionary history in New England.", facts: ["Home to the first public park, public school, and subway in the U.S.", "The Freedom Trail links 16 historic sites", "A center of the American Revolution"] },
-  "Pittsburgh":    { state: "Pennsylvania",     stateCode: "pa", founded: "1758", blurb: "The 'Steel City,' built where three rivers meet, transformed from an industrial powerhouse into a hub for tech, robotics, and healthcare.", facts: ["Sits at the confluence of the Allegheny, Monongahela, and Ohio rivers", "Dr. Jonas Salk developed the first polio vaccine at the University of Pittsburgh (1954)", "The :-) emoticon was invented at Carnegie Mellon in 1982"] },
-  "Minneapolis":   { state: "Minnesota",        stateCode: "mn", founded: "1867", blurb: "The larger of the Twin Cities, built on the only major waterfall on the Mississippi, once the flour-milling capital of the world.", facts: ["Has the world's largest continuous skyway system — 8 miles linking 73 blocks", "The name blends the Dakota word 'minne' (water) with the Greek 'polis' (city)", "Known as 'Mill City' for its flour-milling history"] },
-  "St. Louis":     { state: "Missouri",         stateCode: "mo", founded: "1764", blurb: "Founded as a French fur-trading post on the Mississippi, the 'Gateway to the West' and launch point of the Lewis and Clark expedition.", facts: ["Home to the Gateway Arch — at 630 feet, the tallest monument in the U.S.", "Founded by French fur traders Pierre Laclède and Auguste Chouteau", "Starting point of the 1804 Lewis and Clark expedition"] },
+  "Pittsburgh":    { state: "Pennsylvania",         stateCode: "pa", founded: "1758", blurb: "The 'Steel City,' built where three rivers meet, transformed from an industrial powerhouse into a hub for tech, robotics, and healthcare.", facts: ["Sits at the confluence of the Allegheny, Monongahela, and Ohio rivers", "Dr. Jonas Salk developed the first polio vaccine at the University of Pittsburgh (1954)", "The :-) emoticon was invented at Carnegie Mellon in 1982"] },
+  "Minneapolis":   { state: "Minnesota",            stateCode: "mn", founded: "1867", blurb: "The larger of the Twin Cities, built on the only major waterfall on the Mississippi, once the flour-milling capital of the world.", facts: ["Has the world's largest continuous skyway system — 8 miles linking 73 blocks", "The name blends the Dakota word 'minne' (water) with the Greek 'polis' (city)", "Known as 'Mill City' for its flour-milling history"] },
+  "St. Louis":     { state: "Missouri",             stateCode: "mo", founded: "1764", blurb: "Founded as a French fur-trading post on the Mississippi, the 'Gateway to the West' and launch point of the Lewis and Clark expedition.", facts: ["Home to the Gateway Arch — at 630 feet, the tallest monument in the U.S.", "Founded by French fur traders Pierre Laclède and Auguste Chouteau", "Starting point of the 1804 Lewis and Clark expedition"] },
+  "Beverly Hills": { state: "California",           stateCode: "ca", founded: "1914", blurb: "An affluent city encircled by Los Angeles, world-famous for luxury shopping, Hollywood ties, and its 90210 zip code.", facts: ["Rodeo Drive is one of the most expensive shopping streets in the world", "The '90210' zip was made famous by the 1990s TV series", "Originally a lima bean ranch before being developed in the early 1900s"] },
+};
+
+const ABBR_TO_STATE = {
+  AL:"Alabama",AK:"Alaska",AZ:"Arizona",AR:"Arkansas",CA:"California",CO:"Colorado",
+  CT:"Connecticut",DE:"Delaware",FL:"Florida",GA:"Georgia",HI:"Hawaii",ID:"Idaho",
+  IL:"Illinois",IN:"Indiana",IA:"Iowa",KS:"Kansas",KY:"Kentucky",LA:"Louisiana",
+  ME:"Maine",MD:"Maryland",MA:"Massachusetts",MI:"Michigan",MN:"Minnesota",
+  MS:"Mississippi",MO:"Missouri",MT:"Montana",NE:"Nebraska",NV:"Nevada",
+  NH:"New Hampshire",NJ:"New Jersey",NM:"New Mexico",NY:"New York",NC:"North Carolina",
+  ND:"North Dakota",OH:"Ohio",OK:"Oklahoma",OR:"Oregon",PA:"Pennsylvania",
+  RI:"Rhode Island",SC:"South Carolina",SD:"South Dakota",TN:"Tennessee",TX:"Texas",
+  UT:"Utah",VT:"Vermont",VA:"Virginia",WA:"Washington",WV:"West Virginia",
+  WI:"Wisconsin",WY:"Wyoming",DC:"District of Columbia",
 };
 
 function PreferenceControls({ weights, setWeights, activePreset, setActivePreset }) {
@@ -144,49 +158,71 @@ function lookupCity(city) {
 
 function CityHero({ city, state, metro }) {
   const facts = lookupCity(city);
-  const stateCode = facts?.stateCode;
+  const abbr = state ? String(state).toUpperCase() : null;
+  const stateName = facts?.state || (abbr && ABBR_TO_STATE[abbr]) || abbr || "";
+  const stateCode = facts?.stateCode || (abbr ? abbr.toLowerCase() : null);
+  const flagUrl = stateCode ? `https://flagcdn.com/w640/us-${stateCode}.png` : null;
+  const cityName = city || (metro ? metro.split("-")[0] : "—");
 
   return (
     <div style={{
       position: "relative", overflow: "hidden",
-      background: "white", borderRadius: 16, padding: 22,
-      boxShadow: "0 1px 4px rgba(0,0,0,0.08)", minHeight: 160,
+      background: "white", borderRadius: 16,
+      boxShadow: "0 1px 4px rgba(0,0,0,0.08)",
+      display: "flex", flexDirection: "column", minHeight: 280,
     }}>
-      {stateCode && (
-        <img
-          src={`https://flagcdn.com/w320/us-${stateCode}.png`}
-          alt=""
-          style={{
-            position: "absolute", top: 0, right: 0,
-            width: 180, opacity: 0.10, pointerEvents: "none",
-            transform: "translate(20%, -10%)",
-          }}
-        />
+      {flagUrl && (
+        <div style={{
+          position: "absolute", inset: 0,
+          backgroundImage: `url(${flagUrl})`,
+          backgroundSize: "cover", backgroundPosition: "center",
+          opacity: 0.14,
+        }} />
       )}
+      <div style={{
+        position: "absolute", inset: 0,
+        background: "linear-gradient(125deg, rgba(255,255,255,0.96) 45%, rgba(255,255,255,0.70) 100%)",
+      }} />
 
-      <div style={{ position: "relative", zIndex: 1 }}>
-        <div style={{ fontSize: 22, fontWeight: 700, color: "#1a1a2e" }}>
-          {city || "—"}
+      <div style={{
+        position: "relative", zIndex: 1, padding: 24,
+        display: "flex", flexDirection: "column", flex: 1,
+      }}>
+        <div style={{
+          fontSize: 11, fontWeight: 700, letterSpacing: 1.2,
+          color: "#a9842f", textTransform: "uppercase", marginBottom: 8,
+        }}>
+          📍 Location
         </div>
-        <div style={{ fontSize: 13, color: "#888", marginBottom: 10 }}>
-          {[facts?.state || state, facts?.founded && `Founded ${facts.founded}`]
-            .filter(Boolean).join(" · ")}
+
+        <div style={{ fontSize: 30, fontWeight: 800, color: "#1a1a2e", lineHeight: 1.08 }}>
+          {cityName}
         </div>
+        <div style={{ fontSize: 14, color: "#888", marginTop: 5 }}>
+          {[stateName, facts?.founded && `Founded ${facts.founded}`].filter(Boolean).join(" · ")}
+        </div>
+
+        <div style={{ height: 1, background: "rgba(0,0,0,0.07)", margin: "18px 0" }} />
 
         {facts ? (
           <>
-            <div style={{ fontSize: 13.5, color: "#444", lineHeight: 1.5, marginBottom: 12 }}>
+            <div style={{ fontSize: 13.5, color: "#444", lineHeight: 1.55, marginBottom: 14 }}>
               {facts.blurb}
             </div>
-            <ul style={{ margin: 0, paddingLeft: 18, fontSize: 12.5, color: "#666", lineHeight: 1.7 }}>
+            <ul style={{ margin: 0, paddingLeft: 18, fontSize: 12.5, color: "#666", lineHeight: 1.85 }}>
               {facts.facts.map((f, i) => <li key={i}>{f}</li>)}
             </ul>
           </>
         ) : (
-          <div style={{ fontSize: 13, color: "#999", lineHeight: 1.5 }}>
-            Part of the {metro} metro area.
+          <div style={{ fontSize: 13.5, color: "#555", lineHeight: 1.55 }}>
+            {cityName} is part of the <strong style={{ color: "#333" }}>{metro}</strong> metro area.
           </div>
         )}
+
+        <div style={{ flex: 1 }} />
+        <div style={{ fontSize: 11, color: "#bbb", marginTop: 18 }}>
+          Sources: U.S. Census ACS · Zillow ZHVI
+        </div>
       </div>
     </div>
   );

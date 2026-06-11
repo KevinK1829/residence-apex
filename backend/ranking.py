@@ -60,6 +60,8 @@ def get_zip_tier(zip_code: str, ranked_df: pd.DataFrame) -> dict:
     return {
         "zip": row["RegionName"],
         "metro": row["Metro"],
+        "city": row["City"],
+        "state": row["State"],
         "avg_value": round(row["avg_value"], 2),
         "percentile_rank": round(row["percentile_rank"], 4),
         "tier": row["tier"],
@@ -132,6 +134,8 @@ def compute_value_tier(
     return {
         "zip": str(zip_code),
         "metro": metro,
+        "city": row["City"],
+        "state": row["State"],
         "salary": round(salary, 2),
         "avg_value": round(row["avg_value"], 2),
         "price_to_income": round(this_zip["price_to_income"], 2),
