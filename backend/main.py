@@ -12,10 +12,12 @@ from ranking import rank_zips, get_zip_tier
 
 ranked_df = None
 
+DATA_PATH = os.path.join(os.path.dirname(__file__), "..", "data", "Processed", "metro_clean.csv")
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     global ranked_df
-    ranked_df = rank_zips(clean("../data/Processed/metro_clean.csv"))
+    ranked_df = rank_zips(clean(DATA_PATH))
     yield
 
 app = FastAPI(lifespan=lifespan)

@@ -14,7 +14,8 @@ build/
 .ipynb_checkpoints/
 
 # Data
-data/
+#data/
+data/raw/
 
 # Database
 *.db
