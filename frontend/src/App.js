@@ -82,9 +82,9 @@ export default function App() {
     setLoading(true);
     try {
       const [rankRes, histRes, popRes] = await Promise.all([
-        fetch(`http://localhost:8000/ranking/${zip}`),
-        fetch(`http://localhost:8000/history/${zip}`),
-        fetch(`http://localhost:8000/population/${zip}`)
+        fetch(`https://residence-apex.onrender.com/ranking/${zip}`),
+        fetch(`https://residence-apex.onrender.com/history/${zip}`),
+        fetch(`https://residence-apex.onrender.com/population/${zip}`)
       ]);
       if (!rankRes.ok) throw new Error("Zip code not found — try a zip in a major metro (NY, LA, Chicago, Dallas, Boston, DC, Pittsburgh, Philadelphia, Minneapolis, St. Louis)");
       const rankData = await rankRes.json();
