@@ -36,6 +36,77 @@ const TIER_CONFIG = {
   },
 };
 
+const PRESETS = {
+  balanced:    { label: "Balanced",    afford: 0.40, desire: 0.30, local: 0.30, icon: "⚖️" },
+  best_deal:   { label: "Best deal",   afford: 0.70, desire: 0.10, local: 0.20, icon: "💰" },
+  nicest:      { label: "Nicest area", afford: 0.15, desire: 0.70, local: 0.15, icon: "✨" },
+  local_value: { label: "Local value", afford: 0.25, desire: 0.20, local: 0.55, icon: "🏘️" },
+};
+
+function PreferenceControls({ weights, setWeights, activePreset, setActivePreset }) {
+  function applyPreset(key) {
+    setActivePreset(key);
+    const p = PRESETS[key];
+    setWeights({ afford: p.afford, desire: p.desire, local: p.local });
+  }
+
+  function updateWeight(field, value) {
+    setActivePreset("custom");
+    setWeights(w => ({ ...w, [field]: value }));
+  }
+
+  const sliders = [
+    { key: "afford", label: "Affordability", hint: "Fits your salary" },
+    { key: "desire", label: "Area prestige",  hint: "Higher-value neighborhood" },
+    { key: "local",  label: "Local value",    hint: "Reasonable vs local incomes" },
+  ];
+
+  return (
+    <div style={{ background: "white", borderRadius: 16, padding: 20, boxShadow: "0 1px 4px rgba(0,0,0,0.08)", marginBottom: 24 }}>
+      <div style={{ fontSize: 14, fontWeight: 600, color: "#1a1a2e", marginBottom: 12 }}>
+        What matters most to you?
+      </div>
+
+      <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 18 }}>
+        {Object.entries(PRESETS).map(([key, p]) => {
+          const active = activePreset === key;
+          return (
+            <button
+              key={key}
+              onClick={() => applyPreset(key)}
+              style={{
+                padding: "7px 14px", borderRadius: 999, fontSize: 13, fontWeight: 500,
+                cursor: "pointer", transition: "all 0.15s",
+                border: active ? "1.5px solid #1a1a2e" : "1.5px solid #e0e0e0",
+                background: active ? "#1a1a2e" : "white",
+                color: active ? "white" : "#555",
+              }}
+            >
+              {p.icon} {p.label}
+            </button>
+          );
+        })}
+      </div>
+
+      {sliders.map(s => (
+        <div key={s.key} style={{ marginBottom: 14 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13, marginBottom: 4 }}>
+            <span style={{ color: "#333", fontWeight: 500 }}>{s.label}</span>
+            <span style={{ color: "#888" }}>{Math.round(weights[s.key] * 100)}%</span>
+          </div>
+          <input
+            type="range" min="0" max="1" step="0.05"
+            value={weights[s.key]}
+            onChange={e => updateWeight(s.key, parseFloat(e.target.value))}
+            style={{ width: "100%", accentColor: "#1a1a2e" }}
+          />
+          <div style={{ fontSize: 11, color: "#aaa", marginTop: 2 }}>{s.hint}</div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function AffordabilityBar({ salary, avgValue }) {
   if (!salary || !avgValue) return null;
   const annual = parseFloat(salary);
@@ -70,6 +141,8 @@ export default function App() {
   const [result, setResult] = useState(null);
   const [history, setHistory] = useState(null);
   const [population, setPopulation] = useState(null);
+  const [weights, setWeights] = useState({ afford: 0.40, desire: 0.30, local: 0.30 });
+  const [activePreset, setActivePreset] = useState("balanced");
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
 
@@ -90,7 +163,10 @@ export default function App() {
 
     const handler = setTimeout(async () => {
       try {
-        const res = await fetch(`https://residence-apex.onrender.com/value/${result.zip}?salary=${salary}`);
+        const res = await fetch(
+          `https://residence-apex.onrender.com/value/${result.zip}?salary=${salary}` +
+          `&w_afford=${weights.afford}&w_desire=${weights.desire}&w_local=${weights.local}`
+        );
         if (res.ok) {
           const valueData = await res.json();
           setResult(prev => prev ? { ...prev, ...valueData } : prev);
@@ -101,7 +177,7 @@ export default function App() {
     }, 500);
 
     return () => clearTimeout(handler);
-  }, [salary, result?.zip]);
+  }, [salary, weights, result?.zip]);
 
   async function handleSearch() {
     if (!zip || zip.length < 5) return;
@@ -211,6 +287,15 @@ export default function App() {
           <div style={{ background: "#fff5f5", border: "1px solid #fed7d7", borderRadius: 12, padding: "14px 18px", color: "#c53030", fontSize: 14, marginBottom: 20 }}>
             {error}
           </div>
+        )}
+
+        {result && (
+          <PreferenceControls
+            weights={weights}
+            setWeights={setWeights}
+            activePreset={activePreset}
+            setActivePreset={setActivePreset}
+          />
         )}
 
         {result && config && (

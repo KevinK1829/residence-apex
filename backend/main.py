@@ -37,7 +37,13 @@ def get_ranking(zip_code: str):
         raise HTTPException(status_code=404, detail=f"Zip code {zip_code} not found")
 
 @app.get("/value/{zip_code}")
-async def get_value(zip_code: str, salary: float):
+async def get_value(
+    zip_code: str,
+    salary: float,
+    w_afford: float = 0.40,
+    w_desire: float = 0.30,
+    w_local: float = 0.30,
+):
     median_income = None
     if CENSUS_KEY:
         url = "https://api.census.gov/data/2023/acs/acs5"
@@ -56,7 +62,10 @@ async def get_value(zip_code: str, salary: float):
             median_income = None
 
     try:
-        return compute_value_tier(zip_code, salary, ranked_df, median_income)
+        return compute_value_tier(
+            zip_code, salary, ranked_df, median_income,
+            w_afford=w_afford, w_desire=w_desire, w_local=w_local,
+        )
     except KeyError:
         raise HTTPException(status_code=404, detail=f"Zip code {zip_code} not found")
 

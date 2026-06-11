@@ -69,14 +69,17 @@ def compute_value_tier(
     salary: float,
     ranked_df: pd.DataFrame,
     median_income: float = None,
+    w_afford: float = 0.40,
+    w_desire: float = 0.30,
+    w_local: float = 0.30,
 ) -> dict:
     """
-    Personalized value tier blending three within-metro components:
-      - afford_score: home value vs the USER's salary (logistic curve)
-      - desire_score: home-value percentile within metro
-      - local_score: home value vs LOCAL median income (lower ratio = better value)
+    Personalized value tier with user-adjustable weights.
 
-    If median_income is unavailable, falls back to a 50/50 afford+desire blend.
+    w_afford / w_desire / w_local are the relative weights for the three
+    components. They are normalized internally so they always sum to 1,
+    which means the caller can pass raw slider values (e.g. 70/20/50)
+    without having to pre-normalize them.
     """
     import math
 
@@ -101,20 +104,27 @@ def compute_value_tier(
 
     this_zip = metro_df[metro_df["RegionName"] == str(zip_code)].iloc[0]
 
+    # Normalize weights so they sum to 1, guarding against all-zero input.
+    total_w = w_afford + w_desire + w_local
+    if total_w <= 0:
+        w_afford, w_desire, w_local, total_w = 0.4, 0.3, 0.3, 1.0
+    wa, wd, wl = w_afford / total_w, w_desire / total_w, w_local / total_w
+
+    afford = this_zip["afford_score"]
+    desire = this_zip["desire_score"]
+
     if median_income and median_income > 0:
-        # Local value: this zip's home-value-to-local-income ratio, scored via
-        # the same logistic curve so a low ratio (good local value) scores high.
         local_ratio = row["avg_value"] / median_income
-        local_score = _afford_curve(local_ratio)
-        value_score = (
-            0.40 * this_zip["afford_score"]
-            + 0.30 * this_zip["desire_score"]
-            + 0.30 * local_score
-        )
+        local = _afford_curve(local_ratio)
+        value_score = wa * afford + wd * desire + wl * local
         local_ratio_out = round(local_ratio, 2)
     else:
-        # Fallback when local income is missing.
-        value_score = 0.5 * this_zip["afford_score"] + 0.5 * this_zip["desire_score"]
+        # Redistribute the local weight across the other two when income is missing.
+        denom = wa + wd
+        if denom <= 0:
+            wa, wd = 0.5, 0.5
+            denom = 1.0
+        value_score = (wa / denom) * afford + (wd / denom) * desire
         local_ratio_out = None
 
     tier = _assign_tier(value_score)
