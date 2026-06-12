@@ -176,12 +176,12 @@ function CityHero({ city, state, metro }) {
           position: "absolute", inset: 0,
           backgroundImage: `url(${flagUrl})`,
           backgroundSize: "cover", backgroundPosition: "center",
-          opacity: 0.14,
+          opacity: 0.28,
         }} />
       )}
       <div style={{
         position: "absolute", inset: 0,
-        background: "linear-gradient(125deg, rgba(255,255,255,0.96) 45%, rgba(255,255,255,0.70) 100%)",
+        background: "linear-gradient(125deg, rgba(255,255,255,0.93) 28%, rgba(255,255,255,0.40) 100%)",
       }} />
 
       <div style={{
@@ -252,6 +252,80 @@ function AffordabilityBar({ salary, avgValue }) {
       <div style={{ fontSize: 11, color: "#888", marginTop: 4 }}>
         Rule of thumb: home value should be ≤3x annual salary
       </div>
+    </div>
+  );
+}
+
+function InfoPanel() {
+  const tiers = [
+    { emoji: "🏆", name: "Platinum", range: "Top 10%",       desc: "The most valuable areas in the metro" },
+    { emoji: "🥇", name: "Gold",     range: "70th–90th pct", desc: "High-value, sought-after areas" },
+    { emoji: "🥈", name: "Silver",   range: "40th–70th pct", desc: "Solid mid-market areas" },
+    { emoji: "🥉", name: "Bronze",   range: "Below 40th pct", desc: "The most affordable areas in the metro" },
+  ];
+  const controls = [
+    { name: "Affordability", desc: "Home price measured against your salary" },
+    { name: "Area prestige", desc: "The zip's home-value percentile within its metro" },
+    { name: "Local value",   desc: "Home price measured against the local median income" },
+  ];
+
+  const cell = { padding: "9px 12px", fontSize: 13, textAlign: "left", verticalAlign: "top" };
+  const head = { ...cell, fontSize: 11, textTransform: "uppercase", letterSpacing: 0.6, color: "#999", fontWeight: 600 };
+  const rowBorder = { borderTop: "1px solid rgba(0,0,0,0.06)" };
+
+  return (
+    <div style={{ background: "white", borderRadius: 16, padding: 24, boxShadow: "0 1px 4px rgba(0,0,0,0.08)", marginBottom: 24 }}>
+      <div style={{ fontSize: 16, fontWeight: 700, color: "#1a1a2e", marginBottom: 6 }}>
+        How the ranking works
+      </div>
+      <div style={{ fontSize: 13.5, color: "#555", lineHeight: 1.55, marginBottom: 18 }}>
+        Every zip is scored <strong>against others in the same metro</strong> — so a Chicago zip competes with Chicago,
+        not Manhattan. Search a zip to see its market tier; add your salary to personalize the score to what you can afford.
+      </div>
+
+      <table style={{ width: "100%", borderCollapse: "collapse", marginBottom: 22 }}>
+        <thead>
+          <tr>
+            <th style={head}>Tier</th>
+            <th style={head}>Metro percentile</th>
+            <th style={head}>What it means</th>
+          </tr>
+        </thead>
+        <tbody>
+          {tiers.map((t, i) => (
+            <tr key={t.name} style={i === 0 ? {} : rowBorder}>
+              <td style={{ ...cell, fontWeight: 600, color: "#1a1a2e", whiteSpace: "nowrap" }}>{t.emoji} {t.name}</td>
+              <td style={{ ...cell, color: "#666", whiteSpace: "nowrap" }}>{t.range}</td>
+              <td style={{ ...cell, color: "#666" }}>{t.desc}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+
+      <div style={{ fontSize: 14, fontWeight: 700, color: "#1a1a2e", marginBottom: 6 }}>
+        Personalizing with the sliders
+      </div>
+      <div style={{ fontSize: 13.5, color: "#555", lineHeight: 1.55, marginBottom: 14 }}>
+        Once you enter a salary, three sliders re-weight the score. Pick a <strong>preset</strong> for a quick starting
+        point, then drag any slider to fine-tune — the tier recomputes live.
+      </div>
+
+      <table style={{ width: "100%", borderCollapse: "collapse" }}>
+        <thead>
+          <tr>
+            <th style={head}>Slider</th>
+            <th style={head}>What it weights</th>
+          </tr>
+        </thead>
+        <tbody>
+          {controls.map((c, i) => (
+            <tr key={c.name} style={i === 0 ? {} : rowBorder}>
+              <td style={{ ...cell, fontWeight: 600, color: "#1a1a2e", whiteSpace: "nowrap" }}>{c.name}</td>
+              <td style={{ ...cell, color: "#666" }}>{c.desc}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 }
@@ -431,6 +505,8 @@ export default function App() {
           </div>
         )}
 
+        {!result && <InfoPanel />}
+
         {result && (
           <div className="dashboard-grid">
             {/* Top-left: city hero */}
@@ -468,7 +544,7 @@ export default function App() {
                     {[
                       { label: "Zip Code", value: result.zip },
                       { label: "Metro Area", value: result.metro.split(",")[0] },
-                      { label: "Avg Home Value", value: `$${result.avg_value.toLocaleString()}` },
+                      { label: "Avg Home Value", value: `$${Math.round(result.avg_value).toLocaleString()}` },
                       { label: "Metro Percentile", value: `${Math.round(result.percentile_rank * 100)}th` },
                       { label: "Population (2023)", value: population ? population.toLocaleString() : "—" },
                     ].map(({ label, value }) => (
