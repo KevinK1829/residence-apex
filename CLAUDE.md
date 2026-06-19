@@ -45,11 +45,25 @@ data, price history chart, demographic stats, weather tiles, and a city hero pan
 
 ## Frontend (App.js) — key components
 - InfoPanel — shown before first search; explains tiers and sliders
-- CityHero — state flag background, city facts for 11 curated cities, graceful fallback for all others
+- CityHero — state flag background (flagcdn.com), city facts for 11 curated cities, graceful fallback for all others
 - PreferenceControls — 4 presets (Balanced, Best deal, Nicest area, Local value) + 3 sliders; debounced live re-fetch on change
-- StatTile — reusable tile for demographics/weather grid
+- StatTile — reusable tile for demographics grid
 - AffordabilityBar — visual bar showing home value vs salary (≤3x = affordable)
-- Dashboard grid: 2×2 at 900px+, single column on mobile
+- Thermometer — vertical CSS tube with colored fill + glowing bulb, used inside WeatherCard
+- WeatherCard — standalone climate card below history chart; shows summer high (🔥), sunny days (☀️/⛅ based on >182 days), winter low (❄️); dynamic gradient background keyed to summer high temp
+- Dashboard layout: two explicit flex columns at 900px+ (left: CityHero + ranking card; right: PreferenceControls + history chart + WeatherCard), single column on mobile
+
+## Design system (dark mode — "Charcoal Shift")
+- Page background: #0A111F (flat deep navy)
+- Card backgrounds: #111827 (panels), #141B2D (search card), #0d1527 (CityHero)
+- Inputs: #212529 flat dark gray, white text
+- Focus / accent: #38BDF8 sky blue (inputs, range sliders, preset buttons)
+- Tier cards: dark #111827 base with radial corner gradient twinges in each tier color; medals kept
+  - Platinum: rgba(41,128,185) corners · Gold: rgba(243,156,18) corners
+  - Silver: rgba(133,146,158) corners · Bronze: rgba(202,111,30) corners
+- CityHero: flag opacity 0.38, dark overlay gradient (opaque-left → transparent-right) so flag bleeds through on right
+- Button: purple gradient (667eea → 764ba2) with hover lift + glow animation
+- Weather card background: dynamic gradient keyed to avg summer high (red ≥92°F → orange ≥85°F → amber ≥78°F → blue ≥70°F → deep navy <70°F)
 
 ## Top 10 metros covered
 NY, Chicago, LA, Philadelphia, DC, Pittsburgh, Boston, Dallas, Minneapolis, St. Louis
@@ -61,7 +75,7 @@ NY, Chicago, LA, Philadelphia, DC, Pittsburgh, Boston, Dallas, Minneapolis, St. 
 ## Where things stand (as of last session)
 - All backend endpoints deployed on Render including /weather
 - Frontend deployed on Vercel, auto-deploys on push to main
-- Last commit: weather tiles + city hero redesign + info panel + demographic stats
+- Last commits: weather redesign (thermometer + WeatherCard) → main page dark hero → full charcoal shift dark mode
 - ranking.py and main.py fully wired with personalized scoring and weight params
 - notebooks/ZipDataCleaning.ipynb has minor unstaged changes (safe to ignore)
 - Raw Zillow CSVs are gitignored (data/raw/); only metro_clean.csv is committed
