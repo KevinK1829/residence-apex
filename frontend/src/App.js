@@ -513,7 +513,7 @@ export default function App() {
   const isPersonalized = result && result.value_tier;
 
   return (
-    <div style={{ minHeight: "100vh", background: "#f7f8fa", fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" }}>
+    <div style={{ minHeight: "100vh", background: "linear-gradient(145deg, #0a0e27 0%, #151b4e 50%, #0d1b3e 100%)", fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" }}>
       <style>{`
         .dashboard-grid {
           display: grid;
@@ -525,32 +525,70 @@ export default function App() {
             grid-template-columns: 1fr 1fr;
           }
         }
+        @keyframes fadeUp {
+          from { opacity: 0; transform: translateY(28px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+        .hero-content { animation: fadeUp 0.55s ease both; }
+        .search-card  { animation: fadeUp 0.55s 0.12s ease both; }
+        .results-area { animation: fadeUp 0.45s ease both; }
+        .search-input:focus {
+          border-color: #7c6ef5 !important;
+          box-shadow: 0 0 0 3px rgba(124,110,245,0.18) !important;
+          outline: none;
+        }
+        .search-input::placeholder { color: #aaa; }
+        .search-btn {
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          transition: transform 0.18s ease, box-shadow 0.18s ease, opacity 0.18s ease;
+        }
+        .search-btn:hover:not(:disabled) {
+          transform: translateY(-2px);
+          box-shadow: 0 10px 28px rgba(102,126,234,0.5);
+        }
+        .search-btn:active:not(:disabled) { transform: translateY(0); }
+        .search-btn:disabled { opacity: 0.55; cursor: not-allowed; }
       `}</style>
-      <div style={{ maxWidth: 1200, margin: "0 auto", padding: "60px 1.5rem 80px" }}>
+      <div style={{ maxWidth: 1200, margin: "0 auto", padding: "72px 1.5rem 80px" }}>
 
-        <div style={{ marginBottom: 40 }}>
-          <h1 style={{ fontSize: 32, fontWeight: 700, margin: "0 0 6px", color: "#1a1a2e" }}>
+        <div className="hero-content" style={{ textAlign: "center", marginBottom: 44 }}>
+          <div style={{
+            display: "inline-block",
+            background: "rgba(255,215,0,0.1)",
+            border: "1px solid rgba(255,215,0,0.28)",
+            borderRadius: 999, padding: "5px 18px",
+            fontSize: 11, fontWeight: 700, letterSpacing: 2,
+            color: "#ffd060", textTransform: "uppercase", marginBottom: 22,
+          }}>
+            Housing Value Intelligence
+          </div>
+          <h1 style={{
+            fontSize: "clamp(38px, 6vw, 58px)", fontWeight: 800,
+            margin: "0 0 14px", color: "#fff", lineHeight: 1.08, letterSpacing: -1,
+          }}>
             Residence Apex
           </h1>
-          <p style={{ color: "#666", fontSize: 16, margin: 0 }}>
+          <p style={{ color: "rgba(255,255,255,0.5)", fontSize: 17, margin: 0, maxWidth: 460, marginInline: "auto", lineHeight: 1.55 }}>
             Find the housing value tier for any zip code across 10 major US metros.
           </p>
         </div>
 
-        <div style={{ background: "white", borderRadius: 16, padding: 24, boxShadow: "0 1px 4px rgba(0,0,0,0.08)", marginBottom: 24 }}>
-          <div style={{ display: "flex", gap: 10, marginBottom: 16 }}>
+        <div className="search-card" style={{ background: "white", borderRadius: 20, padding: 28, boxShadow: "0 24px 64px rgba(0,0,0,0.45), 0 4px 16px rgba(0,0,0,0.25)", marginBottom: 32, maxWidth: 660, marginInline: "auto" }}>
+          <div style={{ display: "flex", gap: 10, marginBottom: 12 }}>
             <input
+              className="search-input"
               value={zip}
               onChange={e => setZip(e.target.value)}
               onKeyDown={e => e.key === "Enter" && handleSearch()}
               placeholder="Zip code (e.g. 10001)"
               maxLength={5}
-              style={{ flex: 1, padding: "11px 16px", fontSize: 15, border: "1.5px solid #e0e0e0", borderRadius: 10, outline: "none" }}
+              style={{ flex: 1, padding: "13px 18px", fontSize: 15, border: "1.5px solid #e0e0e0", borderRadius: 12, outline: "none", transition: "border-color 0.18s, box-shadow 0.18s", color: "#1a1a2e" }}
             />
             <select
+              className="search-input"
               value={salary}
               onChange={e => setSalary(e.target.value)}
-              style={{ flex: 1, padding: "11px 16px", fontSize: 15, border: "1.5px solid #e0e0e0", borderRadius: 10, outline: "none", background: "white", color: salary ? "#1a1a2e" : "#999" }}
+              style={{ flex: 1, padding: "13px 18px", fontSize: 15, border: "1.5px solid #e0e0e0", borderRadius: 12, outline: "none", background: "white", color: salary ? "#1a1a2e" : "#999", transition: "border-color 0.18s, box-shadow 0.18s" }}
             >
               <option value="">Annual salary (optional)</option>
               <option value="25000">Under $50k</option>
@@ -576,16 +614,17 @@ export default function App() {
             </select>
           </div>
           <button
+            className="search-btn"
             onClick={handleSearch}
             disabled={loading}
-            style={{ width: "100%", padding: "12px", fontSize: 15, fontWeight: 600, background: "#1a1a2e", color: "white", border: "none", borderRadius: 10, cursor: "pointer" }}
+            style={{ width: "100%", padding: "14px", fontSize: 15, fontWeight: 700, color: "white", border: "none", borderRadius: 12, cursor: "pointer", letterSpacing: 0.3 }}
           >
-            {loading ? "Searching..." : "Search"}
+            {loading ? "Searching…" : "Search"}
           </button>
         </div>
 
         {error && (
-          <div style={{ background: "#fff5f5", border: "1px solid #fed7d7", borderRadius: 12, padding: "14px 18px", color: "#c53030", fontSize: 14, marginBottom: 20 }}>
+          <div style={{ background: "rgba(239,68,68,0.12)", border: "1px solid rgba(239,68,68,0.35)", borderRadius: 12, padding: "14px 18px", color: "#fca5a5", fontSize: 14, marginBottom: 20, maxWidth: 660, marginInline: "auto" }}>
             {error}
           </div>
         )}
@@ -593,7 +632,7 @@ export default function App() {
         {!result && <InfoPanel />}
 
         {result && (
-          <div className="dashboard-grid">
+          <div className="dashboard-grid results-area">
             {/* Left column: city hero + ranking badge */}
             <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
               <CityHero
