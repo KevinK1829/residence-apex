@@ -3,33 +3,33 @@ import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianG
 
 const TIER_CONFIG = {
   platinum: {
-    gradient: "linear-gradient(135deg, #e8f4fd 0%, #d0eaf8 100%)",
-    border: "#2980b9",
-    text: "#1a5276",
+    gradient: "radial-gradient(ellipse at top left, rgba(41,128,185,0.32) 0%, transparent 55%), radial-gradient(ellipse at bottom right, rgba(41,128,185,0.2) 0%, transparent 55%), #111827",
+    border: "rgba(41,128,185,0.55)",
+    text: "#c8e6f8",
     accent: "#2980b9",
     emoji: "💎",
     label: "Platinum"
   },
   gold: {
-    gradient: "linear-gradient(135deg, #fef9e7 0%, #fdeaa0 100%)",
-    border: "#f39c12",
-    text: "#7d6608",
+    gradient: "radial-gradient(ellipse at top left, rgba(243,156,18,0.32) 0%, transparent 55%), radial-gradient(ellipse at bottom right, rgba(243,156,18,0.2) 0%, transparent 55%), #111827",
+    border: "rgba(243,156,18,0.55)",
+    text: "#fde9a0",
     accent: "#f39c12",
     emoji: "🥇",
     label: "Gold"
   },
   silver: {
-    gradient: "linear-gradient(135deg, #f4f6f7 0%, #e8ecee 100%)",
-    border: "#85929e",
-    text: "#2c3e50",
+    gradient: "radial-gradient(ellipse at top left, rgba(133,146,158,0.32) 0%, transparent 55%), radial-gradient(ellipse at bottom right, rgba(133,146,158,0.2) 0%, transparent 55%), #111827",
+    border: "rgba(133,146,158,0.45)",
+    text: "#d5dce2",
     accent: "#85929e",
     emoji: "🥈",
     label: "Silver"
   },
   bronze: {
-    gradient: "linear-gradient(135deg, #fdf2e9 0%, #f5cba7 100%)",
-    border: "#ca6f1e",
-    text: "#6e2f1a",
+    gradient: "radial-gradient(ellipse at top left, rgba(202,111,30,0.32) 0%, transparent 55%), radial-gradient(ellipse at bottom right, rgba(202,111,30,0.2) 0%, transparent 55%), #111827",
+    border: "rgba(202,111,30,0.55)",
+    text: "#f5cba7",
     accent: "#ca6f1e",
     emoji: "🥉",
     label: "Bronze"
@@ -90,8 +90,8 @@ function PreferenceControls({ weights, setWeights, activePreset, setActivePreset
   ];
 
   return (
-    <div style={{ background: "white", borderRadius: 16, padding: 20, boxShadow: "0 1px 4px rgba(0,0,0,0.08)" }}>
-      <div style={{ fontSize: 14, fontWeight: 600, color: "#1a1a2e", marginBottom: 12 }}>
+    <div style={{ background: "#111827", borderRadius: 16, padding: 20, boxShadow: "0 1px 12px rgba(0,0,0,0.3)" }}>
+      <div style={{ fontSize: 14, fontWeight: 600, color: "#fff", marginBottom: 12 }}>
         What matters most to you?
       </div>
 
@@ -105,9 +105,9 @@ function PreferenceControls({ weights, setWeights, activePreset, setActivePreset
               style={{
                 padding: "7px 14px", borderRadius: 999, fontSize: 13, fontWeight: 500,
                 cursor: "pointer", transition: "all 0.15s",
-                border: active ? "1.5px solid #1a1a2e" : "1.5px solid #e0e0e0",
-                background: active ? "#1a1a2e" : "white",
-                color: active ? "white" : "#555",
+                border: active ? "1.5px solid #38BDF8" : "1.5px solid rgba(255,255,255,0.12)",
+                background: active ? "#38BDF8" : "rgba(255,255,255,0.05)",
+                color: active ? "#0A111F" : "rgba(255,255,255,0.65)",
               }}
             >
               {p.icon} {p.label}
@@ -119,16 +119,16 @@ function PreferenceControls({ weights, setWeights, activePreset, setActivePreset
       {sliders.map(s => (
         <div key={s.key} style={{ marginBottom: 14 }}>
           <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13, marginBottom: 4 }}>
-            <span style={{ color: "#333", fontWeight: 500 }}>{s.label}</span>
-            <span style={{ color: "#888" }}>{Math.round(weights[s.key] * 100)}%</span>
+            <span style={{ color: "rgba(255,255,255,0.8)", fontWeight: 500 }}>{s.label}</span>
+            <span style={{ color: "rgba(255,255,255,0.45)" }}>{Math.round(weights[s.key] * 100)}%</span>
           </div>
           <input
             type="range" min="0" max="1" step="0.05"
             value={weights[s.key]}
             onChange={e => updateWeight(s.key, parseFloat(e.target.value))}
-            style={{ width: "100%", accentColor: "#1a1a2e" }}
+            style={{ width: "100%", accentColor: "#38BDF8" }}
           />
-          <div style={{ fontSize: 11, color: "#aaa", marginTop: 2 }}>{s.hint}</div>
+          <div style={{ fontSize: 11, color: "rgba(255,255,255,0.3)", marginTop: 2 }}>{s.hint}</div>
         </div>
       ))}
     </div>
@@ -137,9 +137,9 @@ function PreferenceControls({ weights, setWeights, activePreset, setActivePreset
 
 function StatTile({ label, value, suffix }) {
   return (
-    <div style={{ background: "#f7f7fa", borderRadius: 12, padding: "12px 14px" }}>
-      <div style={{ fontSize: 11, color: "#888", marginBottom: 3 }}>{label}</div>
-      <div style={{ fontSize: 18, fontWeight: 700, color: "#1a1a2e" }}>
+    <div style={{ background: "rgba(255,255,255,0.06)", borderRadius: 12, padding: "12px 14px" }}>
+      <div style={{ fontSize: 11, color: "rgba(255,255,255,0.42)", marginBottom: 3 }}>{label}</div>
+      <div style={{ fontSize: 18, fontWeight: 700, color: "rgba(255,255,255,0.9)" }}>
         {value == null ? "—" : `${value}${suffix || ""}`}
       </div>
     </div>
@@ -167,8 +167,8 @@ function CityHero({ city, state, metro }) {
   return (
     <div style={{
       position: "relative", overflow: "hidden",
-      background: "white", borderRadius: 16,
-      boxShadow: "0 1px 4px rgba(0,0,0,0.08)",
+      background: "#0d1527", borderRadius: 16,
+      boxShadow: "0 1px 12px rgba(0,0,0,0.35)",
       display: "flex", flexDirection: "column", minHeight: 280,
     }}>
       {flagUrl && (
@@ -176,12 +176,12 @@ function CityHero({ city, state, metro }) {
           position: "absolute", inset: 0,
           backgroundImage: `url(${flagUrl})`,
           backgroundSize: "cover", backgroundPosition: "center",
-          opacity: 0.28,
+          opacity: 0.38,
         }} />
       )}
       <div style={{
         position: "absolute", inset: 0,
-        background: "linear-gradient(125deg, rgba(255,255,255,0.93) 28%, rgba(255,255,255,0.40) 100%)",
+        background: "linear-gradient(125deg, rgba(10,17,40,0.91) 0%, rgba(10,17,40,0.60) 50%, rgba(10,17,40,0.15) 100%)",
       }} />
 
       <div style={{
@@ -190,37 +190,37 @@ function CityHero({ city, state, metro }) {
       }}>
         <div style={{
           fontSize: 11, fontWeight: 700, letterSpacing: 1.2,
-          color: "#a9842f", textTransform: "uppercase", marginBottom: 8,
+          color: "#ffd060", textTransform: "uppercase", marginBottom: 8,
         }}>
           📍 Location
         </div>
 
-        <div style={{ fontSize: 30, fontWeight: 800, color: "#1a1a2e", lineHeight: 1.08 }}>
+        <div style={{ fontSize: 30, fontWeight: 800, color: "#fff", lineHeight: 1.08 }}>
           {cityName}
         </div>
-        <div style={{ fontSize: 14, color: "#888", marginTop: 5 }}>
+        <div style={{ fontSize: 14, color: "rgba(255,255,255,0.5)", marginTop: 5 }}>
           {[stateName, facts?.founded && `Founded ${facts.founded}`].filter(Boolean).join(" · ")}
         </div>
 
-        <div style={{ height: 1, background: "rgba(0,0,0,0.07)", margin: "18px 0" }} />
+        <div style={{ height: 1, background: "rgba(255,255,255,0.09)", margin: "18px 0" }} />
 
         {facts ? (
           <>
-            <div style={{ fontSize: 13.5, color: "#444", lineHeight: 1.55, marginBottom: 14 }}>
+            <div style={{ fontSize: 13.5, color: "rgba(255,255,255,0.72)", lineHeight: 1.55, marginBottom: 14 }}>
               {facts.blurb}
             </div>
-            <ul style={{ margin: 0, paddingLeft: 18, fontSize: 12.5, color: "#666", lineHeight: 1.85 }}>
+            <ul style={{ margin: 0, paddingLeft: 18, fontSize: 12.5, color: "rgba(255,255,255,0.55)", lineHeight: 1.85 }}>
               {facts.facts.map((f, i) => <li key={i}>{f}</li>)}
             </ul>
           </>
         ) : (
-          <div style={{ fontSize: 13.5, color: "#555", lineHeight: 1.55 }}>
-            {cityName} is part of the <strong style={{ color: "#333" }}>{metro}</strong> metro area.
+          <div style={{ fontSize: 13.5, color: "rgba(255,255,255,0.65)", lineHeight: 1.55 }}>
+            {cityName} is part of the <strong style={{ color: "#fff" }}>{metro}</strong> metro area.
           </div>
         )}
 
         <div style={{ flex: 1 }} />
-        <div style={{ fontSize: 11, color: "#bbb", marginTop: 18 }}>
+        <div style={{ fontSize: 11, color: "rgba(255,255,255,0.28)", marginTop: 18 }}>
           Sources: U.S. Census ACS · Zillow ZHVI
         </div>
       </div>
@@ -243,13 +243,13 @@ function AffordabilityBar({ salary, avgValue }) {
   return (
     <div style={{ marginTop: 20 }}>
       <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13, marginBottom: 6 }}>
-        <span style={{ color: "#555" }}>Affordability on ${parseInt(salary).toLocaleString()} salary</span>
+        <span style={{ color: "rgba(255,255,255,0.6)" }}>Affordability on ${parseInt(salary).toLocaleString()} salary</span>
         <span style={{ fontWeight: 600, color }}>{label} · {ratio.toFixed(1)}x income</span>
       </div>
-      <div style={{ background: "rgba(0,0,0,0.08)", borderRadius: 99, height: 8, overflow: "hidden" }}>
+      <div style={{ background: "rgba(255,255,255,0.1)", borderRadius: 99, height: 8, overflow: "hidden" }}>
         <div style={{ width: `${pct}%`, background: color, height: "100%", borderRadius: 99, transition: "width 0.4s" }} />
       </div>
-      <div style={{ fontSize: 11, color: "#888", marginTop: 4 }}>
+      <div style={{ fontSize: 11, color: "rgba(255,255,255,0.35)", marginTop: 4 }}>
         Rule of thumb: home value should be ≤3x annual salary
       </div>
     </div>
@@ -270,16 +270,16 @@ function InfoPanel() {
   ];
 
   const cell = { padding: "9px 12px", fontSize: 13, textAlign: "left", verticalAlign: "top" };
-  const head = { ...cell, fontSize: 11, textTransform: "uppercase", letterSpacing: 0.6, color: "#999", fontWeight: 600 };
-  const rowBorder = { borderTop: "1px solid rgba(0,0,0,0.06)" };
+  const head = { ...cell, fontSize: 11, textTransform: "uppercase", letterSpacing: 0.6, color: "rgba(255,255,255,0.38)", fontWeight: 600 };
+  const rowBorder = { borderTop: "1px solid rgba(255,255,255,0.07)" };
 
   return (
-    <div style={{ background: "white", borderRadius: 16, padding: 24, boxShadow: "0 1px 4px rgba(0,0,0,0.08)", marginBottom: 24 }}>
-      <div style={{ fontSize: 16, fontWeight: 700, color: "#1a1a2e", marginBottom: 6 }}>
+    <div style={{ background: "#111827", borderRadius: 16, padding: 24, boxShadow: "0 1px 12px rgba(0,0,0,0.3)", marginBottom: 24 }}>
+      <div style={{ fontSize: 16, fontWeight: 700, color: "#fff", marginBottom: 6 }}>
         How the ranking works
       </div>
-      <div style={{ fontSize: 13.5, color: "#555", lineHeight: 1.55, marginBottom: 18 }}>
-        Every zip is scored <strong>against others in the same metro</strong> — so a Chicago zip competes with Chicago,
+      <div style={{ fontSize: 13.5, color: "rgba(255,255,255,0.6)", lineHeight: 1.55, marginBottom: 18 }}>
+        Every zip is scored <strong style={{ color: "rgba(255,255,255,0.85)" }}>against others in the same metro</strong> — so a Chicago zip competes with Chicago,
         not Manhattan. Search a zip to see its market tier; add your salary to personalize the score to what you can afford.
       </div>
 
@@ -294,19 +294,19 @@ function InfoPanel() {
         <tbody>
           {tiers.map((t, i) => (
             <tr key={t.name} style={i === 0 ? {} : rowBorder}>
-              <td style={{ ...cell, fontWeight: 600, color: "#1a1a2e", whiteSpace: "nowrap" }}>{t.emoji} {t.name}</td>
-              <td style={{ ...cell, color: "#666", whiteSpace: "nowrap" }}>{t.range}</td>
-              <td style={{ ...cell, color: "#666" }}>{t.desc}</td>
+              <td style={{ ...cell, fontWeight: 600, color: "#fff", whiteSpace: "nowrap" }}>{t.emoji} {t.name}</td>
+              <td style={{ ...cell, color: "rgba(255,255,255,0.55)", whiteSpace: "nowrap" }}>{t.range}</td>
+              <td style={{ ...cell, color: "rgba(255,255,255,0.55)" }}>{t.desc}</td>
             </tr>
           ))}
         </tbody>
       </table>
 
-      <div style={{ fontSize: 14, fontWeight: 700, color: "#1a1a2e", marginBottom: 6 }}>
+      <div style={{ fontSize: 14, fontWeight: 700, color: "#fff", marginBottom: 6 }}>
         Personalizing with the sliders
       </div>
-      <div style={{ fontSize: 13.5, color: "#555", lineHeight: 1.55, marginBottom: 14 }}>
-        Once you enter a salary, three sliders re-weight the score. Pick a <strong>preset</strong> for a quick starting
+      <div style={{ fontSize: 13.5, color: "rgba(255,255,255,0.6)", lineHeight: 1.55, marginBottom: 14 }}>
+        Once you enter a salary, three sliders re-weight the score. Pick a <strong style={{ color: "rgba(255,255,255,0.85)" }}>preset</strong> for a quick starting
         point, then drag any slider to fine-tune — the tier recomputes live.
       </div>
 
@@ -320,8 +320,8 @@ function InfoPanel() {
         <tbody>
           {controls.map((c, i) => (
             <tr key={c.name} style={i === 0 ? {} : rowBorder}>
-              <td style={{ ...cell, fontWeight: 600, color: "#1a1a2e", whiteSpace: "nowrap" }}>{c.name}</td>
-              <td style={{ ...cell, color: "#666" }}>{c.desc}</td>
+              <td style={{ ...cell, fontWeight: 600, color: "#fff", whiteSpace: "nowrap" }}>{c.name}</td>
+              <td style={{ ...cell, color: "rgba(255,255,255,0.55)" }}>{c.desc}</td>
             </tr>
           ))}
         </tbody>
@@ -513,7 +513,7 @@ export default function App() {
   const isPersonalized = result && result.value_tier;
 
   return (
-    <div style={{ minHeight: "100vh", background: "linear-gradient(145deg, #0a0e27 0%, #151b4e 50%, #0d1b3e 100%)", fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" }}>
+    <div style={{ minHeight: "100vh", background: "#0A111F", fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" }}>
       <style>{`
         .dashboard-grid {
           display: grid;
@@ -533,11 +533,11 @@ export default function App() {
         .search-card  { animation: fadeUp 0.55s 0.12s ease both; }
         .results-area { animation: fadeUp 0.45s ease both; }
         .search-input:focus {
-          border-color: #7c6ef5 !important;
-          box-shadow: 0 0 0 3px rgba(124,110,245,0.18) !important;
+          border-color: #38BDF8 !important;
+          box-shadow: 0 0 0 3px rgba(56,189,248,0.18) !important;
           outline: none;
         }
-        .search-input::placeholder { color: #aaa; }
+        .search-input::placeholder { color: rgba(255,255,255,0.35); }
         .search-btn {
           background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
           transition: transform 0.18s ease, box-shadow 0.18s ease, opacity 0.18s ease;
@@ -573,7 +573,7 @@ export default function App() {
           </p>
         </div>
 
-        <div className="search-card" style={{ background: "white", borderRadius: 20, padding: 28, boxShadow: "0 24px 64px rgba(0,0,0,0.45), 0 4px 16px rgba(0,0,0,0.25)", marginBottom: 32, maxWidth: 660, marginInline: "auto" }}>
+        <div className="search-card" style={{ background: "#141B2D", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 20, padding: 28, boxShadow: "0 24px 64px rgba(0,0,0,0.55)", marginBottom: 32, maxWidth: 660, marginInline: "auto" }}>
           <div style={{ display: "flex", gap: 10, marginBottom: 12 }}>
             <input
               className="search-input"
@@ -582,13 +582,13 @@ export default function App() {
               onKeyDown={e => e.key === "Enter" && handleSearch()}
               placeholder="Zip code (e.g. 10001)"
               maxLength={5}
-              style={{ flex: 1, padding: "13px 18px", fontSize: 15, border: "1.5px solid #e0e0e0", borderRadius: 12, outline: "none", transition: "border-color 0.18s, box-shadow 0.18s", color: "#1a1a2e" }}
+              style={{ flex: 1, padding: "13px 18px", fontSize: 15, border: "1.5px solid rgba(255,255,255,0.1)", borderRadius: 12, outline: "none", transition: "border-color 0.18s, box-shadow 0.18s", background: "#212529", color: "white" }}
             />
             <select
               className="search-input"
               value={salary}
               onChange={e => setSalary(e.target.value)}
-              style={{ flex: 1, padding: "13px 18px", fontSize: 15, border: "1.5px solid #e0e0e0", borderRadius: 12, outline: "none", background: "white", color: salary ? "#1a1a2e" : "#999", transition: "border-color 0.18s, box-shadow 0.18s" }}
+              style={{ flex: 1, padding: "13px 18px", fontSize: 15, border: "1.5px solid rgba(255,255,255,0.1)", borderRadius: 12, outline: "none", background: "#212529", color: salary ? "white" : "rgba(255,255,255,0.38)", transition: "border-color 0.18s, box-shadow 0.18s" }}
             >
               <option value="">Annual salary (optional)</option>
               <option value="25000">Under $50k</option>
@@ -663,8 +663,8 @@ export default function App() {
                       { label: "Metro Percentile", value: `${Math.round(result.percentile_rank * 100)}th` },
                       { label: "Population (2023)", value: population ? population.toLocaleString() : "—" },
                     ].map(({ label, value }) => (
-                      <div key={label} style={{ background: "rgba(255,255,255,0.5)", borderRadius: 10, padding: "12px 16px" }}>
-                        <div style={{ fontSize: 11, color: config.text, opacity: 0.6, marginBottom: 3, textTransform: "uppercase", letterSpacing: "0.05em" }}>{label}</div>
+                      <div key={label} style={{ background: "rgba(255,255,255,0.06)", borderRadius: 10, padding: "12px 16px" }}>
+                        <div style={{ fontSize: 11, color: config.text, opacity: 0.55, marginBottom: 3, textTransform: "uppercase", letterSpacing: "0.05em" }}>{label}</div>
                         <div style={{ fontSize: 18, fontWeight: 600, color: config.text }}>{value}</div>
                       </div>
                     ))}
@@ -700,25 +700,25 @@ export default function App() {
               />
 
               {history && (
-                <div style={{ background: "white", borderRadius: 16, padding: 24, boxShadow: "0 1px 4px rgba(0,0,0,0.08)" }}>
-                  <div style={{ fontSize: 15, fontWeight: 600, marginBottom: 20, color: "#1a1a2e" }}>
+                <div style={{ background: "#111827", borderRadius: 16, padding: 24, boxShadow: "0 1px 12px rgba(0,0,0,0.3)" }}>
+                  <div style={{ fontSize: 15, fontWeight: 600, marginBottom: 20, color: "#fff" }}>
                     Home Value History · {result?.zip}
                   </div>
                   <ResponsiveContainer width="100%" height={220}>
                     <LineChart data={history}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                      <XAxis dataKey="date" tick={{ fontSize: 11 }} interval={11} />
+                      <CartesianGrid strokeDasharray="3 3" stroke="#1f2937" />
+                      <XAxis dataKey="date" tick={{ fontSize: 11, fill: "rgba(255,255,255,0.4)" }} interval={11} />
                       <YAxis
-                        tick={{ fontSize: 11 }}
+                        tick={{ fontSize: 11, fill: "rgba(255,255,255,0.4)" }}
                         tickFormatter={v => `$${(v / 1000).toFixed(0)}k`}
                         width={55}
                         domain={['auto', 'auto']}
                       />
                       <Tooltip
                         formatter={v => [`$${v.toLocaleString()}`, "Home Value"]}
-                        contentStyle={{ borderRadius: 8, border: "1px solid #eee", fontSize: 13 }}
+                        contentStyle={{ borderRadius: 8, border: "1px solid rgba(255,255,255,0.1)", fontSize: 13, background: "#1f2937", color: "#fff" }}
                       />
-                      <Line type="monotone" dataKey="value" stroke={config?.accent || "#2980b9"} strokeWidth={2.5} dot={false} />
+                      <Line type="monotone" dataKey="value" stroke={config?.accent || "#38BDF8"} strokeWidth={2.5} dot={false} />
                     </LineChart>
                   </ResponsiveContainer>
                 </div>
