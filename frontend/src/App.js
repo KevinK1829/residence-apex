@@ -90,7 +90,7 @@ function PreferenceControls({ weights, setWeights, activePreset, setActivePreset
   ];
 
   return (
-    <div style={{ background: "white", borderRadius: 16, padding: 20, boxShadow: "0 1px 4px rgba(0,0,0,0.08)", marginBottom: 24 }}>
+    <div style={{ background: "white", borderRadius: 16, padding: 20, boxShadow: "0 1px 4px rgba(0,0,0,0.08)" }}>
       <div style={{ fontSize: 14, fontWeight: 600, color: "#1a1a2e", marginBottom: 12 }}>
         What matters most to you?
       </div>
@@ -330,6 +330,82 @@ function InfoPanel() {
   );
 }
 
+function Thermometer({ value, color, min, max }) {
+  const pct = Math.min(Math.max(((value - min) / (max - min)) * 100, 5), 93);
+  return (
+    <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+      <div style={{ position: "relative", width: 14, height: 80 }}>
+        <div style={{
+          position: "absolute", inset: 0,
+          background: "rgba(255,255,255,0.22)",
+          borderRadius: 7,
+          border: "1.5px solid rgba(255,255,255,0.4)"
+        }} />
+        <div style={{
+          position: "absolute", left: 2, right: 2, bottom: 0,
+          height: `${pct}%`,
+          background: color,
+          borderRadius: "4px 4px 0 0",
+        }} />
+      </div>
+      <div style={{
+        width: 22, height: 22, borderRadius: "50%",
+        background: color,
+        border: "2px solid rgba(255,255,255,0.5)",
+        marginTop: -2,
+        boxShadow: `0 2px 8px ${color}66`
+      }} />
+    </div>
+  );
+}
+
+function WeatherCard({ weather }) {
+  if (!weather) return null;
+  const sumHigh = weather.avg_summer_high_f;
+  const winLow = weather.avg_winter_low_f;
+  const sunnyDays = weather.sunny_days_per_year;
+  const isSunny = sunnyDays > 182;
+
+  const palette =
+    sumHigh >= 92 ? { bg: "linear-gradient(150deg, #c0392b 0%, #e74c3c 50%, #e67e22 100%)", tc: "#fff", sc: "rgba(255,255,255,0.72)" } :
+    sumHigh >= 85 ? { bg: "linear-gradient(150deg, #bf5a0e 0%, #e67e22 50%, #f9ca24 100%)", tc: "#fff3e0", sc: "rgba(255,243,224,0.75)" } :
+    sumHigh >= 78 ? { bg: "linear-gradient(150deg, #c98a00 0%, #f0b429 50%, #fff9c4 100%)", tc: "#3d2800", sc: "rgba(61,40,0,0.62)" } :
+    sumHigh >= 70 ? { bg: "linear-gradient(150deg, #1565c0 0%, #2196f3 50%, #90caf9 100%)", tc: "#fff", sc: "rgba(255,255,255,0.72)" } :
+                   { bg: "linear-gradient(150deg, #0d47a1 0%, #1565c0 50%, #1976d2 100%)", tc: "#fff", sc: "rgba(255,255,255,0.72)" };
+
+  return (
+    <div style={{ background: palette.bg, borderRadius: 16, padding: "20px 24px 24px", boxShadow: "0 1px 6px rgba(0,0,0,0.12)" }}>
+      <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 1.3, color: palette.tc, opacity: 0.7, textTransform: "uppercase", marginBottom: 20 }}>
+        Climate
+      </div>
+      <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-around" }}>
+
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}>
+          <span style={{ fontSize: 22 }}>🔥</span>
+          <Thermometer value={sumHigh} color="#ff6b35" min={45} max={112} />
+          <div style={{ fontSize: 28, fontWeight: 800, color: palette.tc, lineHeight: 1, marginTop: 6 }}>{sumHigh}°F</div>
+          <div style={{ fontSize: 11, fontWeight: 600, color: palette.sc }}>Summer High</div>
+        </div>
+
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6, paddingBottom: 28 }}>
+          <span style={{ fontSize: 40 }}>{isSunny ? "☀️" : "⛅"}</span>
+          <div style={{ fontSize: 26, fontWeight: 800, color: palette.tc }}>{sunnyDays}</div>
+          <div style={{ fontSize: 11, fontWeight: 600, color: palette.sc }}>days/yr</div>
+          <div style={{ fontSize: 10, color: palette.sc, marginTop: 2 }}>{isSunny ? "Mostly sunny" : "Often cloudy"}</div>
+        </div>
+
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}>
+          <span style={{ fontSize: 22 }}>❄️</span>
+          <Thermometer value={winLow} color="#56b4e9" min={-20} max={70} />
+          <div style={{ fontSize: 28, fontWeight: 800, color: palette.tc, lineHeight: 1, marginTop: 6 }}>{winLow}°F</div>
+          <div style={{ fontSize: 11, fontWeight: 600, color: palette.sc }}>Winter Low</div>
+        </div>
+
+      </div>
+    </div>
+  );
+}
+
 export default function App() {
   const [zip, setZip] = useState("");
   const [salary, setSalary] = useState("");
@@ -518,23 +594,14 @@ export default function App() {
 
         {result && (
           <div className="dashboard-grid">
-            {/* Top-left: city hero */}
-            <CityHero
-              city={result.city}
-              state={result.state}
-              metro={result.metro}
-            />
+            {/* Left column: city hero + ranking badge */}
+            <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+              <CityHero
+                city={result.city}
+                state={result.state}
+                metro={result.metro}
+              />
 
-            {/* Top-right: preference controls */}
-            <PreferenceControls
-              weights={weights}
-              setWeights={setWeights}
-              activePreset={activePreset}
-              setActivePreset={setActivePreset}
-            />
-
-            {/* Bottom-left: ranking badge */}
-            <div>
               {config && (
                 <div style={{ background: config.gradient, border: `2px solid ${config.border}`, borderRadius: 16, padding: 28, boxShadow: "0 2px 12px rgba(0,0,0,0.06)" }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 20 }}>
@@ -572,9 +639,6 @@ export default function App() {
                       gridTemplateColumns: "repeat(auto-fit, minmax(110px, 1fr))",
                       gap: 10, marginTop: 14,
                     }}>
-                      <StatTile label="Avg summer high" value={weather?.avg_summer_high_f} suffix="°F" />
-                      <StatTile label="Avg winter low"  value={weather?.avg_winter_low_f} suffix="°F" />
-                      <StatTile label="Sunny days/yr"   value={weather?.sunny_days_per_year} />
                       <StatTile label="Median age"    value={stats.median_age} />
                       <StatTile label="Mean commute"  value={stats.mean_commute} suffix=" min" />
                       <StatTile label="Homeowners"    value={stats.owner_pct} suffix="%" />
@@ -587,8 +651,15 @@ export default function App() {
               )}
             </div>
 
-            {/* Bottom-right: price history chart */}
-            <div>
+            {/* Right column: preference controls + history chart + weather */}
+            <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+              <PreferenceControls
+                weights={weights}
+                setWeights={setWeights}
+                activePreset={activePreset}
+                setActivePreset={setActivePreset}
+              />
+
               {history && (
                 <div style={{ background: "white", borderRadius: 16, padding: 24, boxShadow: "0 1px 4px rgba(0,0,0,0.08)" }}>
                   <div style={{ fontSize: 15, fontWeight: 600, marginBottom: 20, color: "#1a1a2e" }}>
@@ -613,6 +684,8 @@ export default function App() {
                   </ResponsiveContainer>
                 </div>
               )}
+
+              <WeatherCard weather={weather} />
             </div>
           </div>
         )}
