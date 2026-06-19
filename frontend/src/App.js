@@ -337,6 +337,7 @@ export default function App() {
   const [history, setHistory] = useState(null);
   const [population, setPopulation] = useState(null);
   const [stats, setStats] = useState(null);
+  const [weather, setWeather] = useState(null);
   const [weights, setWeights] = useState({ afford: 0.40, desire: 0.30, local: 0.30 });
   const [activePreset, setActivePreset] = useState("balanced");
   const [error, setError] = useState(null);
@@ -381,6 +382,14 @@ export default function App() {
       .then(r => (r.ok ? r.json() : null))
       .then(setStats)
       .catch(() => setStats(null));
+  }, [result?.zip]);
+
+  useEffect(() => {
+    if (!result?.zip) { setWeather(null); return; }
+    fetch(`https://residence-apex.onrender.com/weather/${result.zip}`)
+      .then(r => (r.ok ? r.json() : null))
+      .then(setWeather)
+      .catch(() => setWeather(null));
   }, [result?.zip]);
 
   async function handleSearch() {
@@ -563,6 +572,9 @@ export default function App() {
                       gridTemplateColumns: "repeat(auto-fit, minmax(110px, 1fr))",
                       gap: 10, marginTop: 14,
                     }}>
+                      <StatTile label="Avg summer high" value={weather?.avg_summer_high_f} suffix="°F" />
+                      <StatTile label="Avg winter low"  value={weather?.avg_winter_low_f} suffix="°F" />
+                      <StatTile label="Sunny days/yr"   value={weather?.sunny_days_per_year} />
                       <StatTile label="Median age"    value={stats.median_age} />
                       <StatTile label="Mean commute"  value={stats.mean_commute} suffix=" min" />
                       <StatTile label="Homeowners"    value={stats.owner_pct} suffix="%" />
