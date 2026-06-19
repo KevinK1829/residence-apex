@@ -221,3 +221,59 @@ async def get_stats(zip_code: str):
         "mean_commute": mean_commute,
         "bachelors_plus_pct": edu_pct,
     }
+
+@app.get("/weather/{zip_code}")
+async def get_weather(zip_code: str):
+    # Step 1: zip -> lat/long via Zippopotam (free, no key)
+    try:
+        async with httpx.AsyncClient() as client:
+            geo_res = await client.get(f"https://api.zippopotam.us/us/{zip_code}")
+        if geo_res.status_code != 200:
+            raise HTTPException(status_code=404, detail=f"No location data for zip {zip_code}")
+        geo = geo_res.json()
+        place = geo["places"][0]
+        lat, lon = place["latitude"], place["longitude"]
+    except HTTPException:
+        raise
+    except Exception:
+        raise HTTPException(status_code=502, detail="Geocoding lookup failed")
+
+    # Step 2: lat/long -> one year of daily climate data via Open-Meteo (free, no key)
+    params = {
+        "latitude": lat,
+        "longitude": lon,
+        "start_date": "2025-01-01",
+        "end_date": "2025-12-31",
+        "daily": "temperature_2m_max,temperature_2m_min,precipitation_sum",
+        "temperature_unit": "fahrenheit",
+        "timezone": "auto",
+    }
+    try:
+        async with httpx.AsyncClient() as client:
+            wx_res = await client.get("https://archive-api.open-meteo.com/v1/archive", params=params)
+        if wx_res.status_code != 200:
+            raise HTTPException(status_code=502, detail="Weather data unavailable")
+        daily = wx_res.json()["daily"]
+    except HTTPException:
+        raise
+    except Exception:
+        raise HTTPException(status_code=502, detail="Weather request failed")
+
+    dates = daily["time"]
+    highs = daily["temperature_2m_max"]
+    lows = daily["temperature_2m_min"]
+    precip = daily["precipitation_sum"]
+
+    summer_highs = [h for d, h in zip(dates, highs) if d[5:7] in ("06", "07", "08")]
+    winter_lows = [l for d, l in zip(dates, lows) if d[5:7] in ("12", "01", "02")]
+    sunny_days = sum(1 for p in precip if p is not None and p < 0.1)
+
+    def avg(lst):
+        return round(sum(lst) / len(lst), 1) if lst else None
+
+    return {
+        "zip": zip_code,
+        "avg_summer_high_f": avg(summer_highs),
+        "avg_winter_low_f": avg(winter_lows),
+        "sunny_days_per_year": sunny_days,
+    }
